@@ -1,0 +1,63 @@
+{
+  "applicantName": "박서준",
+  "applicantEmail": "parkseojun@example.com",
+  "resumeItemAnswers": [
+    {
+      "resumeItemId": 1,
+      "resumeItemName": "이름",
+      "resumeContent": "박서준"
+    },
+    {
+      "resumeItemId": 2,
+      "resumeItemName": "이메일",
+      "resumeContent": "parkseojun@example.com"
+    },
+    {
+      "resumeItemId": 3,
+      "resumeItemName": "학력",
+      "resumeContent": "성균관대학교 소프트웨어학과 졸업"
+    },
+    {
+      "resumeItemId": 4,
+      "resumeItemName": "학점",
+      "resumeContent": "3.9/4.5"
+    },
+    {
+      "resumeItemId": 5,
+      "resumeItemName": "자격증",
+      "resumeContent": "정보처리기사, AWS Certified Solutions Architect - Associate"
+    },
+    {
+      "resumeItemId": 6,
+      "resumeItemName": "어학",
+      "resumeContent": "OPIc IH"
+    },
+    {
+      "resumeItemId": 7,
+      "resumeItemName": "수상경력",
+      "resumeContent": "삼성전자 주최 알고리즘 경진대회 동상"
+    },
+    {
+      "resumeItemId": 8,
+      "resumeItemName": "경력",
+      "resumeContent": "네이버 웹툰, 백엔드 엔지니어 (14개월)"
+    },
+    {
+      "resumeItemId": 9,
+      "resumeItemName": "봉사시간",
+      "resumeContent": "80시간"
+    }
+  ],
+  "coverLetterQuestionAnswers": [
+    {
+      "coverLetterQuestionId": 1,
+      "questionContent": "지원동기 및 KT 선택 이유",
+      "answerContent": "저는 대학에서 컴퓨터공학을 전공하며 다양한 프로젝트와 인턴 경험을 통해 백엔드 개발의 매력을 느꼈습니다. 특히 API 설계와 데이터베이스 운영을 직접 경험하면서 서비스 안정성과 성능이 사용자 경험에 큰 영향을 미친다는 사실을 배웠습니다. KT는 대규모 고객 기반을 바탕으로 안정적인 IT서비스를 제공하는 회사로, 제가 성장할 수 있는 환경이라고 생각합니다. 아직 모든 기술을 깊게 다루어 본 것은 아니지만, 입사 후 기초부터 차근차근 배우며 역량을 쌓아가고 싶습니다. 특히 클라우드와 AI 융합 서비스에 관심이 있어 관련 분야에서도 경험을 확장하고 싶습니다. 저는 성실하게 배우고 도전하는 자세로 회사에 기여할 수 있다고 생각합니다."
+    },
+    {
+      "coverLetterQuestionId": 2,
+      "questionContent": "직무 관련 경험·역량",
+      "answerContent": "저는 교내와 인턴십을 통해 백엔드 개발을 경험했습니다. 교내 캡스톤에서는 GraphQL 기반의 커머스 시스템을 개발하며 주문 처리 과정을 단순화하고 서버 안정성을 개선했습니다. AWS에 배포하면서 클라우드 환경에서의 운영도 경험했습니다. 인턴십에서는 Spring Boot와 Kubernetes를 활용해 API Gateway 최적화와 배포 자동화를 맡았습니다. 응답 속도를 30% 개선했지만, 더 정밀한 성능 분석이나 대규모 트래픽 실험은 수행하지 못했습니다.이 과정에서 성능 개선의 필요성과 협업의 중요성을 배웠습니다. Jenkins를 활용한 배포 자동화 파이프라인을 구축했지만, 에러 로그 관리나 보안 부분에서는 깊이 관여하지 못한 것이 아쉬움으로 남습니다. 또한 코드 리뷰에서 팀원들의 피드백을 반영하며 협업 역량을 키웠습니다.아직 정량적 성과를 명확히 분석하거나, 보안·대규모 시스템 최적화 경험은 부족합니다. 그러나 이런 경험을 통해 배움의 필요성을 절감했으며, KT에 입사한다면 이러한 한계를 보완하고 싶습니다. 단계적으로 기술 역량을 쌓아 실무에서 신뢰받는 백엔드 개발자로 성장하는 것이 제 목표입니다."
+    }
+  ]
+}

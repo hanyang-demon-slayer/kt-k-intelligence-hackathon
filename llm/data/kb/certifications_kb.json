@@ -1,0 +1,198 @@
+[
+  {
+    "name": "정보처리기사",
+    "aliases": [
+      "정처기"
+    ],
+    "type": "국가기술·전문 자격",
+    "category": [
+      "IT",
+      "소프트웨어",
+      "컴퓨터공학"
+    ]
+  },
+  {
+    "name": "네트워크관리사 2급",
+    "aliases": [],
+    "type": "국가기술·전문 자격",
+    "category": [
+      "네트워크",
+      "IT"
+    ]
+  },
+  {
+    "name": "빅데이터 분석기사",
+    "aliases": [],
+    "type": "국가기술·전문 자격",
+    "category": [
+      "데이터분석",
+      "IT"
+    ]
+  },
+  {
+    "name": "리눅스마스터 1급",
+    "aliases": [],
+    "type": "국가기술·전문 자격",
+    "category": [
+      "시스템",
+      "네트워크",
+      "IT"
+    ]
+  },
+  {
+    "name": "웹디자인기능사",
+    "aliases": [],
+    "type": "국가기술·전문 자격(직무 관련)",
+    "category": [
+      "디자인",
+      "웹",
+      "IT"
+    ]
+  },
+  {
+    "name": "SQL 개발자",
+    "aliases": [
+      "SQLD"
+    ],
+    "type": "국가공인 일반 자격",
+    "category": [
+      "데이터베이스",
+      "IT"
+    ]
+  },
+  {
+    "name": "데이터분석 준전문가",
+    "aliases": [
+      "ADsP",
+      "에디슾"
+    ],
+    "type": "국가공인 일반 자격",
+    "category": [
+      "데이터분석",
+      "IT"
+    ]
+  },
+  {
+    "name": "데이터분석 전문가",
+    "aliases": [
+      "ADP"
+    ],
+    "type": "국가공인 일반 자격",
+    "category": [
+      "데이터분석",
+      "IT"
+    ]
+  },
+  {
+    "name": "컴퓨터활용능력 1급",
+    "aliases": [
+      "컴활 1급"
+    ],
+    "type": "국가공인 일반 자격",
+    "category": [
+      "오피스",
+      "IT"
+    ]
+  },
+  {
+    "name": "컴퓨터활용능력 2급",
+    "aliases": [
+      "컴활 2급"
+    ],
+    "type": "국가공인 일반 자격",
+    "category": [
+      "오피스",
+      "IT"
+    ]
+  },
+  {
+    "name": "AWS Certified Solutions Architect – Associate",
+    "aliases": [
+      "AWS SAA",
+      "SAA",
+      "아마존 솔루션스 아키텍트 어소시에이트"
+    ],
+    "type": "민간 자격증",
+    "category": [
+      "클라우드",
+      "인프라",
+      "IT"
+    ]
+  },
+  {
+    "name": "클라우드마스터 자격",
+    "aliases": [],
+    "type": "민간 자격증",
+    "category": [
+      "클라우드",
+      "IT"
+    ]
+  },
+  {
+    "name": "GTQ 포토샵 1급",
+    "aliases": [],
+    "type": "민간 자격증",
+    "category": [
+      "디자인",
+      "그래픽",
+      "IT"
+    ]
+  },
+  {
+    "name": "GTQ 1급",
+    "aliases": [],
+    "type": "민간 자격증",
+    "category": [
+      "디자인",
+      "그래픽",
+      "IT"
+    ]
+  },
+  {
+    "name": "MOS Master",
+    "aliases": [],
+    "type": "민간 자격증",
+    "category": [
+      "오피스",
+      "IT"
+    ]
+  },
+  {
+    "name": "MOS Excel Expert",
+    "aliases": [],
+    "type": "민간 자격증",
+    "category": [
+      "오피스",
+      "IT"
+    ]
+  },
+  {
+    "name": "MOS Expert",
+    "aliases": [],
+    "type": "민간 자격증",
+    "category": [
+      "오피스",
+      "IT"
+    ]
+  },
+  {
+    "name": "ITQ OA Master",
+    "aliases": [],
+    "type": "민간 자격증",
+    "category": [
+      "오피스",
+      "IT"
+    ]
+  },
+  {
+    "name": "PMP (Project Management Professional)",
+    "aliases": [
+      "PMP"
+    ],
+    "type": "민간 자격증",
+    "category": [
+      "프로젝트관리",
+      "IT"
+    ]
+  }
+]

@@ -1,0 +1,21 @@
+fastapi
+uvicorn[standard]
+pydantic
+requests
+
+# --- AI & ML Libraries ---
+torch
+transformers
+accelerate
+bitsandbytes  # 4비트 양자화 지원
+# Base 양자화 모델을 위한 추가 라이브러리
+optimum
+auto-gptq
+
+# --- RAG & Vector DB Libraries ---
+chromadb
+sentence-transformers
+scikit-learn
+
+# --- Utility ---
+tqdm
