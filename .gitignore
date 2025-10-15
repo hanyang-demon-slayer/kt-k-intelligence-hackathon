@@ -1,10 +1,10 @@
 # ===========================================
 # KT K-Intelligence Hackathon Project
-# .gitignore
+# Root .gitignore - Common items only
 # ===========================================
 
 # ===========================================
-# OS Generated Files
+# OS Generated Files (Common)
 # ===========================================
 .DS_Store
 .DS_Store?
@@ -18,8 +18,12 @@ Thumbs.db
 *~
 
 # ===========================================
-# IDE and Editor Files
+# IDE and Editor Files (Common)
 # ===========================================
+# VS Code
+.vscode/
+*.code-workspace
+
 # IntelliJ IDEA
 .idea/
 *.iml
@@ -27,229 +31,12 @@ Thumbs.db
 *.iws
 out/
 
-# Eclipse
-.metadata
-.project
-.classpath
-.settings/
-bin/
-tmp/
-*.tmp
-*.bak
-*.swp
-*~.nib
-local.properties
-
-# VS Code
-.vscode/
-*.code-workspace
-
 # Sublime Text
 *.sublime-project
 *.sublime-workspace
 
 # ===========================================
-# Backend (Java/Spring Boot/Gradle)
-# ===========================================
-backend/build/
-backend/.gradle/
-backend/gradle/wrapper/gradle-wrapper.jar
-backend/!gradle/wrapper/gradle-wrapper.properties
-backend/*.jar
-backend/*.war
-backend/*.ear
-backend/*.class
-backend/*.log
-backend/*.tmp
-backend/*.temp
-
-# Spring Boot
-backend/target/
-backend/.mvn/wrapper/maven-wrapper.jar
-backend/.mvn/wrapper/maven-wrapper.properties
-
-# Database
-backend/*.db
-backend/*.sqlite
-backend/*.h2.db
-
-# Uploaded files (user generated content)
-backend/uploads/
-backend/static/uploads/
-backend/src/main/resources/static/uploads/
-
-# Application logs
-backend/logs/
-backend/*.log
-
-# ===========================================
-# Frontend (React/TypeScript/Vite)
-# ===========================================
-frontend_figma/node_modules/
-frontend_figma/dist/
-frontend_figma/build/
-frontend_figma/.vite/
-frontend_figma/.cache/
-frontend_figma/coverage/
-frontend_figma/.nyc_output/
-
-# Dependencies
-frontend_figma/npm-debug.log*
-frontend_figma/yarn-debug.log*
-frontend_figma/yarn-error.log*
-frontend_figma/pnpm-debug.log*
-frontend_figma/lerna-debug.log*
-
-# Runtime data
-frontend_figma/pids
-frontend_figma/*.pid
-frontend_figma/*.seed
-frontend_figma/*.pid.lock
-
-# Environment variables
-frontend_figma/.env
-frontend_figma/.env.local
-frontend_figma/.env.development.local
-frontend_figma/.env.test.local
-frontend_figma/.env.production.local
-
-# ===========================================
-# LLM (Python)
-# ===========================================
-llm/__pycache__/
-llm/*.py[cod]
-llm/*$py.class
-llm/*.so
-llm/.Python
-llm/build/
-llm/develop-eggs/
-llm/dist/
-llm/downloads/
-llm/eggs/
-llm/.eggs/
-llm/lib/
-llm/lib64/
-llm/parts/
-llm/sdist/
-llm/var/
-llm/wheels/
-llm/share/python-wheels/
-llm/*.egg-info/
-llm/.installed.cfg
-llm/*.egg
-llm/MANIFEST
-
-# PyInstaller
-llm/*.manifest
-llm/*.spec
-
-# Installer logs
-llm/pip-log.txt
-llm/pip-delete-this-directory.txt
-
-# Unit test / coverage reports
-llm/htmlcov/
-llm/.tox/
-llm/.nox/
-llm/.coverage
-llm/.coverage.*
-llm/.cache
-llm/nosetests.xml
-llm/coverage.xml
-llm/*.cover
-llm/*.py,cover
-llm/.hypothesis/
-llm/.pytest_cache/
-llm/cover/
-
-# Translations
-llm/*.mo
-llm/*.pot
-
-# Django stuff:
-llm/*.log
-llm/local_settings.py
-llm/db.sqlite3
-llm/db.sqlite3-journal
-
-# Flask stuff:
-llm/instance/
-llm/.webassets-cache
-
-# Scrapy stuff:
-llm/.scrapy
-
-# Sphinx documentation
-llm/docs/_build/
-
-# PyBuilder
-llm/.pybuilder/
-llm/target/
-
-# Jupyter Notebook
-llm/.ipynb_checkpoints
-
-# IPython
-llm/profile_default/
-llm/ipython_config.py
-
-# pyenv
-llm/.python-version
-
-# pipenv
-llm/Pipfile.lock
-
-# poetry
-llm/poetry.lock
-
-# pdm
-llm/.pdm.toml
-
-# PEP 582
-llm/__pypackages__/
-
-# Celery stuff
-llm/celerybeat-schedule
-llm/celerybeat.pid
-
-# SageMath parsed files
-llm/*.sage.py
-
-# Environments
-llm/.env
-llm/.venv
-llm/env/
-llm/venv/
-llm/ENV/
-llm/env.bak/
-llm/venv.bak/
-
-# Spyder project settings
-llm/.spyderproject
-llm/.spyproject
-
-# Rope project settings
-llm/.ropeproject
-
-# mkdocs documentation
-llm/site/
-
-# mypy
-llm/.mypy_cache/
-llm/.dmypy.json
-llm/dmypy.json
-
-# Pyre type checker
-llm/.pyre/
-
-# pytype static type analyzer
-llm/.pytype/
-
-# Cython debug symbols
-llm/cython_debug/
-
-# ===========================================
-# Temporary Files
+# Temporary Files (Common)
 # ===========================================
 *.tmp
 *.temp
@@ -259,117 +46,23 @@ llm/cython_debug/
 *~
 
 # ===========================================
-# Logs
+# Logs (Common)
 # ===========================================
 logs/
 *.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-lerna-debug.log*
-.pnpm-debug.log*
 
 # ===========================================
-# Runtime data
+# Project Documentation
 # ===========================================
-pids
-*.pid
-*.seed
-*.pid.lock
-
-# ===========================================
-# Coverage directory used by tools like istanbul
-# ===========================================
-coverage/
-*.lcov
-
-# ===========================================
-# Dependency directories
-# ===========================================
-node_modules/
-jspm_packages/
-
-# ===========================================
-# Optional npm cache directory
-# ===========================================
-.npm
-
-# ===========================================
-# Optional eslint cache
-# ===========================================
-.eslintcache
-
-# ===========================================
-# Microbundle cache
-# ===========================================
-.rpt2_cache/
-.rts2_cache_cjs/
-.rts2_cache_es/
-.rts2_cache_umd/
-
-# ===========================================
-# Optional REPL history
-# ===========================================
-.node_repl_history
-
-# ===========================================
-# Output of 'npm pack'
-# ===========================================
-*.tgz
-
-# ===========================================
-# Yarn Integrity file
-# ===========================================
-.yarn-integrity
-
-# ===========================================
-# parcel-bundler cache (https://parceljs.org/)
-# ===========================================
-.cache
-.parcel-cache
-
-# ===========================================
-# Next.js build output
-# ===========================================
-.next
-
-# ===========================================
-# Nuxt.js build / generate output
-# ===========================================
-.nuxt
-dist
-
-# ===========================================
-# Gatsby files
-# ===========================================
-.cache/
-public
-
-# ===========================================
-# Storybook build outputs
-# ===========================================
-.out
-.storybook-out
-
-# ===========================================
-# Temporary folders
-# ===========================================
-tmp/
-temp/
-
-# ===========================================
-# Project specific
-# ===========================================
-# Keep important configuration files
-!backend/gradle/wrapper/gradle-wrapper.properties
-!backend/src/main/resources/application.properties
-!backend/src/main/resources/db/migration/*.sql
-!frontend_figma/package.json
-!frontend_figma/package-lock.json
-!llm/requirements.txt
-
-# Ignore specific project files
+# Ignore project-specific backup files
 search-memo.txt
 ApplicationReview_backup.tsx
 WorkspaceManagementUpdated.tsx
 JobPostingFormUpdated.tsx
+
+# ===========================================
+# Note: Sub-project specific .gitignore files
+# ===========================================
+# - backend/.gitignore (Java/Gradle specific)
+# - frontend_figma/.gitignore (React/TypeScript specific)  
+# - llm/.gitignore (Python specific)
