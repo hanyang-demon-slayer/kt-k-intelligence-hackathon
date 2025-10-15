@@ -23,10 +23,6 @@ public class ResumeItemAnswer {
     @Column(name = "resume_content", columnDefinition = "TEXT")
     private String resumeContent;
 
-    // 평가 결과 점수 (정량 평가)
-    @Column(name = "resume_score")
-    private Integer resumeScore;
-
     // 여러 답변은 하나의 지원서에 속함 (N:1)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "application_id")

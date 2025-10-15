@@ -32,6 +32,7 @@ public class ResumeItem {
 
     // 필수 제출 여부
     @Column(name = "is_required")
+    @Builder.Default
     private Boolean isRequired = false; 
 
     // 항목별 최대 점수
@@ -45,10 +46,12 @@ public class ResumeItem {
 
     // 항목별 평가 기준들 (1:N)
     @OneToMany(mappedBy = "resumeItem", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Builder.Default
     private List<ResumeItemCriterion> criteria = new ArrayList<>();
 
     // 항목별 지원자 답변들 (1:N)
     @OneToMany(mappedBy = "resumeItem", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Builder.Default
     private List<ResumeItemAnswer> answers = new ArrayList<>();
 
     // ResumeItemCriterion 편의 메서드

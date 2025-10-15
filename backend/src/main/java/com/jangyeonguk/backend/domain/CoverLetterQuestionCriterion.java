@@ -26,7 +26,6 @@ public class CoverLetterQuestionCriterion {
 
     @Column(name = "overall_description", columnDefinition = "TEXT")
     private String overallDescription; // 전반적인 설명
-    // TODO: 이거 나중에 LLM이 학습한 설명으로 바꿀거임!
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cover_letter_question_id")
@@ -35,4 +34,23 @@ public class CoverLetterQuestionCriterion {
     @OneToMany(mappedBy = "coverLetterQuestionCriterion", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @Builder.Default
     private List<CoverLetterQuestionCriterionDetail> details = new ArrayList<>();
+
+    // CoverLetterQuestionCriterionDetail 편의 메서드
+    public void addDetail(CoverLetterQuestionCriterionDetail detail) {
+        if (detail == null) {
+            return;
+        }
+        this.details.add(detail);
+        detail.setCoverLetterQuestionCriterion(this);
+    }
+
+    public void removeDetail(CoverLetterQuestionCriterionDetail detail) {
+        if (detail == null) {
+            return;
+        }
+        this.details.remove(detail);
+        if (detail.getCoverLetterQuestionCriterion() == this) {
+            detail.setCoverLetterQuestionCriterion(null);
+        }
+    }
 }

@@ -463,80 +463,7 @@ public class ApplicationService {
                 }
             }
 
-            // ResumeItemAnswer에 하드코딩된 평가 점수 저장
-            if (evaluationResult.getResumeEvaluations() != null) {
-                // 하드코딩된 점수 매핑
-                Map<String, Integer> hardcodedScores = new HashMap<>();
-                hardcodedScores.put("이름", 91);  // 85 + 6
-                hardcodedScores.put("이메일", 98); // 90 + 8
-                hardcodedScores.put("학력", 81);  // 75 + 6
-                hardcodedScores.put("학점", 88);  // 80 + 8
-                hardcodedScores.put("자격증", 76); // 70 + 6
-                hardcodedScores.put("어학", 73);  // 65 + 8
-                hardcodedScores.put("수상경력", 66); // 60 + 6
-                hardcodedScores.put("경력", 86);  // 78 + 8
-                hardcodedScores.put("봉사시간", 61); // 55 + 6
-                
-                for (EvaluationResultDto.ResumeEvaluationDto resumeEval : evaluationResult.getResumeEvaluations()) {
-                    // ResumeItemAnswer 조회 및 업데이트
-                    List<ResumeItemAnswer> resumeAnswers = resumeItemAnswerRepository.findByApplicationIdAndResumeItemId(
-                            application.getId(), resumeEval.getResumeItemId());
-                    
-                    if (!resumeAnswers.isEmpty()) {
-                        ResumeItemAnswer resumeAnswer = resumeAnswers.get(0);
-                        // 하드코딩된 점수 사용
-                        Integer hardcodedScore = hardcodedScores.getOrDefault(resumeEval.getResumeItemName(), 50);
-                        resumeAnswer.setResumeScore(hardcodedScore);
-                        resumeItemAnswerRepository.save(resumeAnswer);
-                        
-                        log.info("ResumeItemAnswer 하드코딩 점수 저장 - Application ID: {}, ResumeItem ID: {}, Name: {}, Score: {}", 
-                                application.getId(), resumeEval.getResumeItemId(), resumeEval.getResumeItemName(), hardcodedScore);
-                    }
-                }
-            }
 
-            // CoverLetterQuestionAnswer에 평가 결과 저장
-            if (evaluationResult.getCoverLetterQuestionEvaluations() != null) {
-                for (EvaluationResultDto.CoverLetterQuestionEvaluationDto coverEval : evaluationResult.getCoverLetterQuestionEvaluations()) {
-                    // CoverLetterQuestionAnswer 조회 및 업데이트
-                    List<CoverLetterQuestionAnswer> coverAnswers = coverLetterQuestionAnswerRepository.findByApplicationIdAndCoverLetterQuestionId(
-                            application.getId(), coverEval.getCoverLetterQuestionId());
-                    
-                    if (!coverAnswers.isEmpty()) {
-                        CoverLetterQuestionAnswer coverAnswer = coverAnswers.get(0);
-                        
-                        // 요약 저장
-                        if (coverEval.getSummary() != null) {
-                            coverAnswer.setAnswerSummary(coverEval.getSummary());
-                        }
-                        
-                        // 키워드 저장 (JSON 형태로)
-                        if (coverEval.getKeywords() != null && !coverEval.getKeywords().isEmpty()) {
-                            try {
-                                String keywordsJson = objectMapper.writeValueAsString(coverEval.getKeywords());
-                                coverAnswer.setAnswerKeywords(keywordsJson);
-                            } catch (Exception e) {
-                                log.error("키워드 JSON 변환 실패: {}", e.getMessage());
-                            }
-                        }
-                        
-                        // 정성 평가 저장 (JSON 형태로)
-                        if (coverEval.getAnswerEvaluations() != null && !coverEval.getAnswerEvaluations().isEmpty()) {
-                            try {
-                                String evaluationsJson = objectMapper.writeValueAsString(coverEval.getAnswerEvaluations());
-                                coverAnswer.setAnswerQualitativeEvaluation(evaluationsJson);
-                            } catch (Exception e) {
-                                log.error("정성 평가 JSON 변환 실패: {}", e.getMessage());
-                            }
-                        }
-                        
-                        coverLetterQuestionAnswerRepository.save(coverAnswer);
-                        
-                        log.info("CoverLetterQuestionAnswer 평가 결과 저장 - Application ID: {}, Question ID: {}, Summary: {}", 
-                                application.getId(), coverEval.getCoverLetterQuestionId(), coverEval.getSummary());
-                    }
-                }
-            }
 
             // 기존 평가 결과 확인 및 저장/업데이트
             Optional<EvaluationResult> existingResult = evaluationResultRepository.findByApplicationId(application.getId());
@@ -850,7 +777,7 @@ public class ApplicationService {
                 .orElseThrow(() -> new IllegalArgumentException("지원서를 찾을 수 없습니다."));
 
         // 평가 의견 저장
-        application.setEvaluationComment(comment);
+        // 평가 의견은 EvaluationResult에 저장되므로 여기서는 제거
 
         // 평가 상태 저장
         try {

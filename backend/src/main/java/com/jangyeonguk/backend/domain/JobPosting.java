@@ -104,14 +104,17 @@ public class JobPosting {
 
     // 하나의 공고는 여러 개의 이력서 항목을 가진다 (1:N)
     @OneToMany(mappedBy = "jobPosting", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Builder.Default
     private List<ResumeItem> resumeItems = new ArrayList<>();
 
     // 하나의 공고는 여러 개의 자기소개서 문항을 가진다 (1:N)
     @OneToMany(mappedBy = "jobPosting", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Builder.Default
     private List<CoverLetterQuestion> coverLetterQuestions = new ArrayList<>();
 
     // 하나의 공고에는 여러 지원서가 접수된다 (1:N)
     @OneToMany(mappedBy = "jobPosting", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Builder.Default
     private List<Application> applications = new ArrayList<>();
 
     // 연관 컬렉션 편의 메서드: 두 측면 동기화로 일관성 보장
@@ -178,6 +181,58 @@ public class JobPosting {
         this.totalScore = resume + cover;
         if (this.passingScore != null && this.passingScore >= this.totalScore) {
             throw new IllegalStateException("합격기준점수는 총점보다 작아야 합니다.");
+        }
+        
+        // 자기소개서 질문별 점수 총합 검증
+        validateCoverLetterQuestionScores();
+        
+        // 이력서 항목별 점수 총합 검증
+        validateResumeItemScores();
+    }
+    
+    /**
+     * 자기소개서 질문별 점수 총합이 coverLetterScoreWeight와 일치하는지 검증
+     */
+    private void validateCoverLetterQuestionScores() {
+        if (this.coverLetterQuestions == null || this.coverLetterQuestions.isEmpty()) {
+            return;
+        }
+        
+        int totalQuestionScore = this.coverLetterQuestions.stream()
+            .filter(question -> question.getMaxScore() != null)
+            .mapToInt(CoverLetterQuestion::getMaxScore)
+            .sum();
+            
+        int expectedScore = this.coverLetterScoreWeight != null ? this.coverLetterScoreWeight : 0;
+        
+        if (totalQuestionScore != expectedScore) {
+            throw new IllegalStateException(
+                String.format("자기소개서 질문별 점수 총합(%d)이 자기소개서 배점 비중(%d)과 일치하지 않습니다.", 
+                    totalQuestionScore, expectedScore)
+            );
+        }
+    }
+    
+    /**
+     * 이력서 항목별 점수 총합이 resumeScoreWeight와 일치하는지 검증
+     */
+    private void validateResumeItemScores() {
+        if (this.resumeItems == null || this.resumeItems.isEmpty()) {
+            return;
+        }
+        
+        int totalItemScore = this.resumeItems.stream()
+            .filter(item -> item.getMaxScore() != null)
+            .mapToInt(ResumeItem::getMaxScore)
+            .sum();
+            
+        int expectedScore = this.resumeScoreWeight != null ? this.resumeScoreWeight : 0;
+        
+        if (totalItemScore != expectedScore) {
+            throw new IllegalStateException(
+                String.format("이력서 항목별 점수 총합(%d)이 이력서 배점 비중(%d)과 일치하지 않습니다.", 
+                    totalItemScore, expectedScore)
+            );
         }
     }
 }

@@ -17,7 +17,6 @@ public class ResumeItemAnswerResponseDto {
 
     private Long id;
     private String resumeContent;
-    private Integer resumeScore;
     private Long resumeItemId;
     private String resumeItemName;
     private Integer maxScore;
@@ -26,7 +25,6 @@ public class ResumeItemAnswerResponseDto {
         return ResumeItemAnswerResponseDto.builder()
                 .id(answer.getId())
                 .resumeContent(answer.getResumeContent())
-                .resumeScore(answer.getResumeScore())
                 .resumeItemId(answer.getResumeItem().getId())
                 .resumeItemName(answer.getResumeItem().getName())
                 .maxScore(answer.getResumeItem().getMaxScore())
