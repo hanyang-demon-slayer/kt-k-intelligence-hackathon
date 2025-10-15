@@ -1,12 +1,8 @@
-package com.jangyeonguk.backend.domain.application;
+package com.jangyeonguk.backend.domain;
 
-import com.jangyeonguk.backend.domain.coverletter.CoverLetterQuestionAnswer;
-import com.jangyeonguk.backend.domain.jobposting.JobPosting;
-import com.jangyeonguk.backend.domain.resume.ResumeItemAnswer;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 

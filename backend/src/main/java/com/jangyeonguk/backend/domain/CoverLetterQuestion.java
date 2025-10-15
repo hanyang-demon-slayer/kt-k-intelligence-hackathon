@@ -1,6 +1,5 @@
-package com.jangyeonguk.backend.domain.coverletter;
+package com.jangyeonguk.backend.domain;
 
-import com.jangyeonguk.backend.domain.jobposting.JobPosting;
 import jakarta.persistence.*;
 import lombok.*;
 

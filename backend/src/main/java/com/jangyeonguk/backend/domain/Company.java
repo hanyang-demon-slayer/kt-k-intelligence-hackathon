@@ -5,7 +5,6 @@ import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import com.jangyeonguk.backend.domain.JobPosting;
 
 /**
  * 회사 엔티티

@@ -1,11 +1,5 @@
 package com.jangyeonguk.backend.domain;
 
-import com.jangyeonguk.backend.domain.Company;
-import com.jangyeonguk.backend.domain.Application;
-import com.jangyeonguk.backend.domain.CoverLetterQuestion;
-import com.jangyeonguk.backend.domain.ResumeItem;
-import com.jangyeonguk.backend.domain.EmploymentType;
-import com.jangyeonguk.backend.domain.PostingStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import jakarta.validation.constraints.*;
@@ -21,9 +15,9 @@ import java.util.List;
 @Table(name = "job_postings")
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class JobPosting {
 
     @Id

@@ -1,4 +1,4 @@
-package com.jangyeonguk.backend.domain.jobposting;
+package com.jangyeonguk.backend.domain;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

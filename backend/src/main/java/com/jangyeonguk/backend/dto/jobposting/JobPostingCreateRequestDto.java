@@ -1,8 +1,8 @@
 package com.jangyeonguk.backend.dto.jobposting;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.jangyeonguk.backend.domain.jobposting.EmploymentType;
-import com.jangyeonguk.backend.domain.jobposting.PostingStatus;
+import com.jangyeonguk.backend.domain.EmploymentType;
+import com.jangyeonguk.backend.domain.PostingStatus;
 import com.jangyeonguk.backend.dto.coverletter.CoverLetterQuestionCreateRequestDto;
 import com.jangyeonguk.backend.dto.resume.ResumeItemCreateRequestDto;
 import lombok.AllArgsConstructor;

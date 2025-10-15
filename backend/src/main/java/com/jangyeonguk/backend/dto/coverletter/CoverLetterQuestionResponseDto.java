@@ -1,6 +1,6 @@
 package com.jangyeonguk.backend.dto.coverletter;
 
-import com.jangyeonguk.backend.domain.coverletter.CoverLetterQuestion;
+import com.jangyeonguk.backend.domain.CoverLetterQuestion;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

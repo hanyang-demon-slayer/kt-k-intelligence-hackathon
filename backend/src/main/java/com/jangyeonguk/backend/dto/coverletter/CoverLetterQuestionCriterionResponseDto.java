@@ -25,7 +25,7 @@ public class CoverLetterQuestionCriterionResponseDto {
     /**
      * CoverLetterQuestionCriterion 엔티티를 CoverLetterQuestionCriterionResponseDto로 변환
      */
-    public static CoverLetterQuestionCriterionResponseDto from(com.jangyeonguk.backend.domain.coverletter.CoverLetterQuestionCriterion criterion) {
+    public static CoverLetterQuestionCriterionResponseDto from(com.jangyeonguk.backend.domain.CoverLetterQuestionCriterion criterion) {
         return CoverLetterQuestionCriterionResponseDto.builder()
                 .id(criterion.getId())
                 .name(criterion.getName())

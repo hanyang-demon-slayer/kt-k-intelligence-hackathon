@@ -1,14 +1,14 @@
 package com.jangyeonguk.backend.service;
 
-import com.jangyeonguk.backend.domain.application.Application;
-import com.jangyeonguk.backend.domain.coverletter.CoverLetterQuestion;
-import com.jangyeonguk.backend.domain.coverletter.CoverLetterQuestionCriterion;
-import com.jangyeonguk.backend.domain.coverletter.CoverLetterQuestionCriterionDetail;
-import com.jangyeonguk.backend.domain.jobposting.Company;
-import com.jangyeonguk.backend.domain.jobposting.JobPosting;
-import com.jangyeonguk.backend.domain.jobposting.PostingStatus;
-import com.jangyeonguk.backend.domain.resume.ResumeItem;
-import com.jangyeonguk.backend.domain.resume.ResumeItemCriterion;
+import com.jangyeonguk.backend.domain.Application;
+import com.jangyeonguk.backend.domain.CoverLetterQuestion;
+import com.jangyeonguk.backend.domain.CoverLetterQuestionCriterion;
+import com.jangyeonguk.backend.domain.CoverLetterQuestionCriterionDetail;
+import com.jangyeonguk.backend.domain.Company;
+import com.jangyeonguk.backend.domain.JobPosting;
+import com.jangyeonguk.backend.domain.PostingStatus;
+import com.jangyeonguk.backend.domain.ResumeItem;
+import com.jangyeonguk.backend.domain.ResumeItemCriterion;
 import com.jangyeonguk.backend.dto.jobposting.JobPostingCreateRequestDto;
 import com.jangyeonguk.backend.dto.jobposting.JobPostingResponseDto;
 import com.jangyeonguk.backend.repository.*;

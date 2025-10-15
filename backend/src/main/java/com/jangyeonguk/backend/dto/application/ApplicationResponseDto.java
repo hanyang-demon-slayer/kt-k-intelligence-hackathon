@@ -1,7 +1,7 @@
 package com.jangyeonguk.backend.dto.application;
 
-import com.jangyeonguk.backend.domain.application.Application;
-import com.jangyeonguk.backend.domain.application.ApplicationStatus;
+import com.jangyeonguk.backend.domain.Application;
+import com.jangyeonguk.backend.domain.ApplicationStatus;
 import com.jangyeonguk.backend.dto.coverletter.CoverLetterQuestionAnswerResponseDto;
 import com.jangyeonguk.backend.dto.evaluation.EvaluationResultResponseDto;
 import com.jangyeonguk.backend.dto.resume.ResumeItemAnswerResponseDto;

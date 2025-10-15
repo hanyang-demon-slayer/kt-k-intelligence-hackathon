@@ -1,6 +1,6 @@
 package com.jangyeonguk.backend.repository;
 
-import com.jangyeonguk.backend.domain.evaluation.EvaluationResult;
+import com.jangyeonguk.backend.domain.EvaluationResult;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

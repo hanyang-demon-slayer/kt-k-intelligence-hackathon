@@ -1,6 +1,6 @@
 package com.jangyeonguk.backend.dto.coverletter;
 
-import com.jangyeonguk.backend.domain.resume.Grade;
+import com.jangyeonguk.backend.domain.Grade;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

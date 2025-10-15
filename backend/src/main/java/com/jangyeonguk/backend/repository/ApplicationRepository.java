@@ -1,8 +1,8 @@
 package com.jangyeonguk.backend.repository;
 
-import com.jangyeonguk.backend.domain.application.Applicant;
-import com.jangyeonguk.backend.domain.application.Application;
-import com.jangyeonguk.backend.domain.application.ApplicationStatus;
+import com.jangyeonguk.backend.domain.Applicant;
+import com.jangyeonguk.backend.domain.Application;
+import com.jangyeonguk.backend.domain.ApplicationStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

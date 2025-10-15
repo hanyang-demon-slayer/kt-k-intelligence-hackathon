@@ -1,6 +1,6 @@
 package com.jangyeonguk.backend.dto.resume;
 
-import com.jangyeonguk.backend.domain.resume.ResumeItemType;
+import com.jangyeonguk.backend.domain.ResumeItemType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
