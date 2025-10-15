@@ -1,0 +1,111 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: kt-hackathon-postgres
+    environment:
+      POSTGRES_DB: kt_hackathon
+      POSTGRES_USER: hackathon_user
+      POSTGRES_PASSWORD: hackathon_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/src/main/resources/db/migration:/docker-entrypoint-initdb.d
+    networks:
+      - hackathon-network
+
+  # Redis (for caching)
+  redis:
+    image: redis:7-alpine
+    container_name: kt-hackathon-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - hackathon-network
+
+  # Backend Service
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: kt-hackathon-backend
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      DATABASE_URL: jdbc:postgresql://postgres:5432/kt_hackathon
+      DATABASE_USERNAME: hackathon_user
+      DATABASE_PASSWORD: hackathon_pass
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+      - redis
+    volumes:
+      - ./backend/uploads:/app/uploads
+    networks:
+      - hackathon-network
+
+  # Frontend Service
+  frontend:
+    build:
+      context: ./frontend_figma
+      dockerfile: Dockerfile
+    container_name: kt-hackathon-frontend
+    environment:
+      VITE_API_BASE_URL: http://localhost:8080
+      VITE_LLM_API_URL: http://localhost:8000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - hackathon-network
+
+  # LLM Service
+  llm:
+    build:
+      context: ./llm
+      dockerfile: Dockerfile
+    container_name: kt-hackathon-llm
+    environment:
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      BACKEND_API_URL: http://backend:8080
+    ports:
+      - "8000:8000"
+    depends_on:
+      - backend
+    volumes:
+      - ./llm/data:/app/data
+    networks:
+      - hackathon-network
+
+  # Nginx (Reverse Proxy)
+  nginx:
+    image: nginx:alpine
+    container_name: kt-hackathon-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/ssl:/etc/nginx/ssl
+    depends_on:
+      - frontend
+      - backend
+      - llm
+    networks:
+      - hackathon-network
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  hackathon-network:
+    driver: bridge
