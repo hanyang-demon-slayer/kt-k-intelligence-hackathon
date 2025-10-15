@@ -1,6 +1,6 @@
 package com.jangyeonguk.backend.dto.coverletter;
 
-import com.jangyeonguk.backend.domain.resume.Grade;
+import com.jangyeonguk.backend.domain.Grade;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,7 +23,7 @@ public class CoverLetterQuestionCriterionDetailResponseDto {
     /**
      * CoverLetterQuestionCriterionDetail 엔티티를 CoverLetterQuestionCriterionDetailResponseDto로 변환
      */
-    public static CoverLetterQuestionCriterionDetailResponseDto from(com.jangyeonguk.backend.domain.coverletter.CoverLetterQuestionCriterionDetail detail) {
+    public static CoverLetterQuestionCriterionDetailResponseDto from(com.jangyeonguk.backend.domain.CoverLetterQuestionCriterionDetail detail) {
         return CoverLetterQuestionCriterionDetailResponseDto.builder()
                 .id(detail.getId())
                 .grade(detail.getGrade())

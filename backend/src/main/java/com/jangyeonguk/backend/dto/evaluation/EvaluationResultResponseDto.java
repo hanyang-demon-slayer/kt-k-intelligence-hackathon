@@ -1,6 +1,6 @@
 package com.jangyeonguk.backend.dto.evaluation;
 
-import com.jangyeonguk.backend.domain.evaluation.EvaluationResult;
+import com.jangyeonguk.backend.domain.EvaluationResult;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

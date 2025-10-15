@@ -1,7 +1,7 @@
 package com.jangyeonguk.backend.dto.resume;
 
-import com.jangyeonguk.backend.domain.resume.Grade;
-import com.jangyeonguk.backend.domain.resume.ResumeItemCriterion;
+import com.jangyeonguk.backend.domain.Grade;
+import com.jangyeonguk.backend.domain.ResumeItemCriterion;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

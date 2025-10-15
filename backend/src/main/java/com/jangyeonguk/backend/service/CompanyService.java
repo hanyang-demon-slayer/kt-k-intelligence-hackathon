@@ -1,6 +1,6 @@
 package com.jangyeonguk.backend.service;
 
-import com.jangyeonguk.backend.domain.jobposting.Company;
+import com.jangyeonguk.backend.domain.Company;
 import com.jangyeonguk.backend.dto.company.CompanyCreateRequestDto;
 import com.jangyeonguk.backend.dto.company.CompanyResponseDto;
 import com.jangyeonguk.backend.repository.CompanyRepository;

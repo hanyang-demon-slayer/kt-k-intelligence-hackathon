@@ -1,6 +1,5 @@
-package com.jangyeonguk.backend.domain.evaluation;
+package com.jangyeonguk.backend.domain;
 
-import com.jangyeonguk.backend.domain.application.Application;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

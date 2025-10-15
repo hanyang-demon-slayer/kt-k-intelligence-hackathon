@@ -1,8 +1,8 @@
 package com.jangyeonguk.backend.dto.jobposting;
 
-import com.jangyeonguk.backend.domain.jobposting.EmploymentType;
-import com.jangyeonguk.backend.domain.jobposting.JobPosting;
-import com.jangyeonguk.backend.domain.jobposting.PostingStatus;
+import com.jangyeonguk.backend.domain.EmploymentType;
+import com.jangyeonguk.backend.domain.JobPosting;
+import com.jangyeonguk.backend.domain.PostingStatus;
 import com.jangyeonguk.backend.dto.coverletter.CoverLetterQuestionResponseDto;
 import com.jangyeonguk.backend.dto.resume.ResumeItemResponseDto;
 import com.jangyeonguk.backend.dto.application.ApplicationResponseDto;

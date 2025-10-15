@@ -2,8 +2,6 @@ package com.jangyeonguk.backend.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
-import com.jangyeonguk.backend.domain.Grade;
-import com.jangyeonguk.backend.domain.ResumeItem;
 
 /**
  * 이력서 항목 평가기준 엔티티
@@ -25,8 +23,9 @@ public class ResumeItemCriterion {
     @Enumerated(EnumType.STRING)
     private Grade grade;
 
+    // 설명 (예: 박사학위)
     @Column(columnDefinition = "TEXT")
-    private String description; // 설명 (예: 박사학위)
+    private String description;
 
     // 등급별 점수
     @Column(name = "score_per_grade")

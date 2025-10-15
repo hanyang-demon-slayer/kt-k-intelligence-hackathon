@@ -1,6 +1,6 @@
 package com.jangyeonguk.backend.repository;
 
-import com.jangyeonguk.backend.domain.coverletter.CoverLetterQuestionAnswer;
+import com.jangyeonguk.backend.domain.CoverLetterQuestionAnswer;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

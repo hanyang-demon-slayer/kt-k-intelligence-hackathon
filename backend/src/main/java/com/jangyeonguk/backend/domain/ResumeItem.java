@@ -1,6 +1,5 @@
-package com.jangyeonguk.backend.domain.resume;
+package com.jangyeonguk.backend.domain;
 
-import com.jangyeonguk.backend.domain.JobPosting;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -48,7 +47,11 @@ public class ResumeItem {
     @OneToMany(mappedBy = "resumeItem", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<ResumeItemCriterion> criteria = new ArrayList<>();
 
-    // 연관 컬렉션 편의 메서드: 두 측면 동기화로 일관성 보장
+    // 항목별 지원자 답변들 (1:N)
+    @OneToMany(mappedBy = "resumeItem", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<ResumeItemAnswer> answers = new ArrayList<>();
+
+    // ResumeItemCriterion 편의 메서드
     public void addCriterion(ResumeItemCriterion criterion) {
         if (criterion == null) {
             return;
@@ -64,6 +67,25 @@ public class ResumeItem {
         this.criteria.remove(criterion);
         if (criterion.getResumeItem() == this) {
             criterion.setResumeItem(null);
+        }
+    }
+
+    // ResumeItemAnswer 편의 메서드
+    public void addAnswer(ResumeItemAnswer answer) {
+        if (answer == null) {
+            return;
+        }
+        this.answers.add(answer);
+        answer.setResumeItem(this);
+    }
+
+    public void removeAnswer(ResumeItemAnswer answer) {
+        if (answer == null) {
+            return;
+        }
+        this.answers.remove(answer);
+        if (answer.getResumeItem() == this) {
+            answer.setResumeItem(null);
         }
     }
 }

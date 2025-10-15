@@ -1,6 +1,5 @@
 package com.jangyeonguk.backend.domain;
 
-import com.jangyeonguk.backend.domain.Application;
 import jakarta.persistence.*;
 import lombok.*;
 
