@@ -1,12 +1,32 @@
 package com.jangyeonguk.backend.domain;
 
-import jakarta.persistence.*;
-import lombok.*;
-import jakarta.validation.constraints.*;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 /**
  * 채용공고 엔티티
@@ -116,6 +136,11 @@ public class JobPosting {
     @OneToMany(mappedBy = "jobPosting", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @Builder.Default
     private List<Application> applications = new ArrayList<>();
+
+    // 하나의 공고는 여러 평가결과를 가진다 (1:N)
+    @OneToMany(mappedBy = "jobPosting", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<EvaluationResult> evaluationResults = new ArrayList<>();
 
     // 연관 컬렉션 편의 메서드: 두 측면 동기화로 일관성 보장
     public void addResumeItem(ResumeItem resumeItem) {
@@ -233,6 +258,25 @@ public class JobPosting {
                 String.format("이력서 항목별 점수 총합(%d)이 이력서 배점 비중(%d)과 일치하지 않습니다.", 
                     totalItemScore, expectedScore)
             );
+        }
+    }
+
+    // EvaluationResult 편의 메서드
+    public void addEvaluationResult(EvaluationResult evaluationResult) {
+        if (evaluationResult == null) {
+            return;
+        }
+        this.evaluationResults.add(evaluationResult);
+        evaluationResult.setJobPosting(this);
+    }
+
+    public void removeEvaluationResult(EvaluationResult evaluationResult) {
+        if (evaluationResult == null) {
+            return;
+        }
+        this.evaluationResults.remove(evaluationResult);
+        if (evaluationResult.getJobPosting() == this) {
+            evaluationResult.setJobPosting(null);
         }
     }
 }
