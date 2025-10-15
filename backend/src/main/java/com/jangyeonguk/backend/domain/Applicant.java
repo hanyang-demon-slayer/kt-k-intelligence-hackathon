@@ -29,4 +29,23 @@ public class Applicant {
 
     @OneToMany(mappedBy = "applicant", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Application> applications = new ArrayList<>();
+
+    // Application 편의 메서드
+    public void addApplication(Application application) {
+        if (application == null) {
+            return;
+        }
+        this.applications.add(application);
+        application.setApplicant(this);
+    }
+
+    public void removeApplication(Application application) {
+        if (application == null) {
+            return;
+        }
+        this.applications.remove(application);
+        if (application.getApplicant() == this) {
+            application.setApplicant(null);
+        }
+    }
 }

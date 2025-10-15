@@ -17,10 +17,6 @@ public class CoverLetterQuestionAnswerResponseDto {
 
     private Long id;
     private String answerContent;
-    private Integer answerQuantitativeScore;
-    private String answerSummary;
-    private String answerQualitativeEvaluation;
-    private String answerKeywords;
     private Long coverLetterQuestionId;
     private String questionContent;
     private Integer maxCharacters;
@@ -29,10 +25,6 @@ public class CoverLetterQuestionAnswerResponseDto {
         return CoverLetterQuestionAnswerResponseDto.builder()
                 .id(answer.getId())
                 .answerContent(answer.getAnswerContent())
-                .answerQuantitativeScore(answer.getAnswerQuantitativeScore())
-                .answerSummary(answer.getAnswerSummary())
-                .answerQualitativeEvaluation(answer.getAnswerQualitativeEvaluation())
-                .answerKeywords(answer.getAnswerKeywords())
                 .coverLetterQuestionId(answer.getCoverLetterQuestion().getId())
                 .questionContent(answer.getCoverLetterQuestion().getContent())
                 .maxCharacters(answer.getCoverLetterQuestion().getMaxCharacters())

@@ -25,9 +25,6 @@ public class ApplicationResponseDto {
 
     private Long id;
     private ApplicationStatus status;
-    private Integer totalEvaluationScore;
-    private String evaluationComment;
-    private Integer resumeQuantitativeScore;
     
     // 지원자 정보
     private ApplicantDto applicant;
@@ -56,9 +53,6 @@ public class ApplicationResponseDto {
         return ApplicationResponseDto.builder()
                 .id(application.getId())
                 .status(application.getStatus())
-                .totalEvaluationScore(application.getTotalEvaluationScore())
-                .evaluationComment(application.getEvaluationComment())
-                .resumeQuantitativeScore(application.getResumeQuantitativeScore())
                 .applicant(ApplicantDto.builder()
                         .id(application.getApplicant().getId())
                         .name(application.getApplicant().getName())
@@ -72,7 +66,8 @@ public class ApplicationResponseDto {
                         application.getCoverLetterQuestionAnswers().stream()
                                 .map(CoverLetterQuestionAnswerResponseDto::from)
                                 .collect(Collectors.toList()) : new ArrayList<>())
-                .evaluationResult(null) // EvaluationResult는 별도 조회 필요
+                .evaluationResult(application.getEvaluationResult() != null ?
+                        EvaluationResultResponseDto.from(application.getEvaluationResult()) : null)
                 .build();
     }
 }
