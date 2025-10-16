@@ -28,7 +28,7 @@ public class Company {
     @OneToMany(mappedBy = "company", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<JobPosting> jobPostings = new ArrayList<>();
 
-    // 양방향 연관관계 편의 메서드: 두 측면을 동시에 동기화하여 일관성 보장
+    // 양방향 연관관계 편의 메서드
     public void addJobPosting(JobPosting jobPosting) {
         if (jobPosting == null) {
             return;
@@ -37,7 +37,6 @@ public class Company {
         jobPosting.setCompany(this);
     }
 
-    // 컬렉션/연관 모두 정리하여 고아 참조 방지
     public void removeJobPosting(JobPosting jobPosting) {
         if (jobPosting == null) {
             return;
