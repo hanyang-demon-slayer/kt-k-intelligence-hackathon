@@ -1,11 +1,12 @@
 package com.jangyeonguk.backend.repository;
 
-import com.jangyeonguk.backend.domain.EvaluationResult;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-import java.util.Optional;
+import com.jangyeonguk.backend.domain.EvaluationResult;
 
 /**
  * 평가 결과 Repository
@@ -15,7 +16,6 @@ public interface EvaluationResultRepository extends JpaRepository<EvaluationResu
 
     Optional<EvaluationResult> findByApplicationId(Long applicationId);
 
-    Optional<EvaluationResult> findByApplicantEmailAndJobPostingId(String applicantEmail, Long jobPostingId);
 
     List<EvaluationResult> findByJobPostingId(Long jobPostingId);
 }
