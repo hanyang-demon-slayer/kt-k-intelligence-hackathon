@@ -6,33 +6,102 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
-bin/
-!**/src/main/**/bin/
-!**/src/test/**/bin/
+# ===========================================
+# OS Generated Files
+# ===========================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*.swp
+*.swo
+*~
 
-### IntelliJ IDEA ###
-.idea
-*.iws
+# ===========================================
+# IDE and Editor Files
+# ===========================================
+# IntelliJ IDEA
+.idea/
 *.iml
 *.ipr
+*.iws
 out/
-!**/src/main/**/out/
-!**/src/test/**/out/
 
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
+# Eclipse
+.metadata
+.project
+.classpath
+.settings/
+bin/
+tmp/
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
 
-### VS Code ###
+# VS Code
 .vscode/
+*.code-workspace
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# ===========================================
+# Java/Gradle Build Files
+# ===========================================
+build/
+.gradle/
+*.jar
+*.war
+*.ear
+*.class
+*.log
+*.tmp
+*.temp
+
+# Spring Boot
+target/
+.mvn/wrapper/maven-wrapper.jar
+.mvn/wrapper/maven-wrapper.properties
+
+# ===========================================
+# Database Files
+# ===========================================
+*.db
+*.sqlite
+*.h2.db
+
+# ===========================================
+# Uploaded Files (User Generated Content)
+# ===========================================
+uploads/
+!uploads/.gitkeep
+
+# ===========================================
+# Application Logs
+# ===========================================
+logs/
+*.log
+
+# ===========================================
+# Temporary Files
+# ===========================================
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+*~
+
+# ===========================================
+# Keep Important Files
+# ===========================================
+!gradle/wrapper/gradle-wrapper.jar
+!gradle/wrapper/gradle-wrapper.properties
+!src/main/resources/application.properties
+!src/main/resources/db/migration/*.sql
