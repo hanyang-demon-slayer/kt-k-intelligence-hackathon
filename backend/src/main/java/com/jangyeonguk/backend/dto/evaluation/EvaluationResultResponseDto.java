@@ -1,6 +1,7 @@
 package com.jangyeonguk.backend.dto.evaluation;
 
 import com.jangyeonguk.backend.domain.EvaluationResult;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -29,9 +30,12 @@ public class EvaluationResultResponseDto {
     public static EvaluationResultResponseDto from(EvaluationResult evaluationResult) {
         return EvaluationResultResponseDto.builder()
                 .id(evaluationResult.getId())
-                .applicantName(evaluationResult.getApplicantName())
-                .applicantEmail(evaluationResult.getApplicantEmail())
-                .jobPostingId(evaluationResult.getJobPostingId())
+                .applicantName(evaluationResult.getApplication() != null ? 
+                    evaluationResult.getApplication().getApplicant().getName() : null)
+                .applicantEmail(evaluationResult.getApplication() != null ? 
+                    evaluationResult.getApplication().getApplicant().getEmail() : null)
+                .jobPostingId(evaluationResult.getJobPosting() != null ? 
+                    evaluationResult.getJobPosting().getId() : null)
                 .totalScore(evaluationResult.getTotalScore())
                 .resumeScores(evaluationResult.getResumeScores())
                 .coverLetterScores(evaluationResult.getCoverLetterScores())

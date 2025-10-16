@@ -1,21 +1,23 @@
 version: '3.8'
 
 services:
-  # PostgreSQL Database
-  postgres:
-    image: postgres:15-alpine
-    container_name: kt-hackathon-postgres
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: kt-hackathon-mysql
     environment:
-      POSTGRES_DB: kt_hackathon
-      POSTGRES_USER: hackathon_user
-      POSTGRES_PASSWORD: hackathon_pass
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: kt_hackathon
+      MYSQL_USER: hackathon_user
+      MYSQL_PASSWORD: hackathon_pass
     ports:
-      - "5432:5432"
+      - "3306:3306"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./backend/src/main/resources/db/migration:/docker-entrypoint-initdb.d
+      - mysql_data:/var/lib/mysql # 데이터를 하드디스크에 저장
+      - ./backend/src/main/resources/db/schema.sql:/docker-entrypoint-initdb.d/init.sql # 초기 데이터베이스 초기화
     networks:
-      - hackathon-network
+      - hackathon-network # 다른 컨테이너들과의 네트워크 연결용
+    command: --default-authentication-plugin=mysql_native_password # MySQL 8.0 인증 플러그인 설정
 
   # Redis (for caching)
   redis:
@@ -36,7 +38,7 @@ services:
     container_name: kt-hackathon-backend
     environment:
       SPRING_PROFILES_ACTIVE: docker
-      DATABASE_URL: jdbc:postgresql://postgres:5432/kt_hackathon
+      DATABASE_URL: jdbc:mysql://mysql:3306/kt_hackathon
       DATABASE_USERNAME: hackathon_user
       DATABASE_PASSWORD: hackathon_pass
       REDIS_HOST: redis
@@ -44,7 +46,7 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - postgres
+      - mysql
       - redis
     volumes:
       - ./backend/uploads:/app/uploads
@@ -103,7 +105,7 @@ services:
       - hackathon-network
 
 volumes:
-  postgres_data:
+  mysql_data:
   redis_data:
 
 networks:

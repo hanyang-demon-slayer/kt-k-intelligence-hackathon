@@ -204,90 +204,6 @@ public class ApplicationService {
         return data;
     }
 
-    /**
-     * 평가 기준 정보 생성
-     */
-    private Map<String, Object> createEvaluationCriteria(JobPosting jobPosting) {
-        Map<String, Object> criteria = new HashMap<>();
-        
-        // 기본 평가 기준
-        criteria.put("totalScore", jobPosting.getTotalScore());
-        criteria.put("resumeScoreWeight", jobPosting.getResumeScoreWeight());
-        criteria.put("coverLetterScoreWeight", jobPosting.getCoverLetterScoreWeight());
-        criteria.put("passingScore", jobPosting.getPassingScore());
-        
-        // 이력서 평가 기준
-        List<Map<String, Object>> resumeCriteria = new ArrayList<>();
-        if (jobPosting.getResumeItems() != null) {
-            for (ResumeItem resumeItem : jobPosting.getResumeItems()) {
-                Map<String, Object> itemCriteria = new HashMap<>();
-                itemCriteria.put("resumeItemId", resumeItem.getId());
-                itemCriteria.put("resumeItemName", resumeItem.getName());
-                itemCriteria.put("resumeItemType", resumeItem.getType().toString());
-                itemCriteria.put("isRequired", resumeItem.getIsRequired());
-                itemCriteria.put("maxScore", resumeItem.getMaxScore());
-                
-                // 이력서 항목별 평가 기준
-                if (resumeItem.getCriteria() != null) {
-                    List<Map<String, Object>> itemCriterionList = new ArrayList<>();
-                    for (ResumeItemCriterion criterion : resumeItem.getCriteria()) {
-                        Map<String, Object> criterionData = new HashMap<>();
-                        criterionData.put("grade", criterion.getGrade().toString());
-                        criterionData.put("description", criterion.getDescription());
-                        criterionData.put("scorePerGrade", criterion.getScorePerGrade());
-                        itemCriterionList.add(criterionData);
-                    }
-                    itemCriteria.put("criteria", itemCriterionList);
-                }
-                
-                resumeCriteria.add(itemCriteria);
-            }
-        }
-        criteria.put("resumeCriteria", resumeCriteria);
-        
-        // 자기소개서 평가 기준
-        List<Map<String, Object>> coverLetterCriteria = new ArrayList<>();
-        if (jobPosting.getCoverLetterQuestions() != null) {
-            for (CoverLetterQuestion question : jobPosting.getCoverLetterQuestions()) {
-                Map<String, Object> questionCriteria = new HashMap<>();
-                questionCriteria.put("coverLetterQuestionId", question.getId());
-                questionCriteria.put("questionContent", question.getContent());
-                questionCriteria.put("isRequired", question.getIsRequired());
-                questionCriteria.put("maxCharacters", question.getMaxCharacters());
-                
-                // 자기소개서 질문별 평가 기준
-                if (question.getCriteria() != null) {
-                    List<Map<String, Object>> questionCriterionList = new ArrayList<>();
-                    for (CoverLetterQuestionCriterion criterion : question.getCriteria()) {
-                        Map<String, Object> criterionData = new HashMap<>();
-                        criterionData.put("criteriaName", criterion.getName());
-                        criterionData.put("overallDescription", criterion.getOverallDescription());
-                        
-                        // 세부 기준 (등급별 정보)
-                        if (criterion.getDetails() != null) {
-                            List<Map<String, Object>> detailList = new ArrayList<>();
-                            for (CoverLetterQuestionCriterionDetail detail : criterion.getDetails()) {
-                                Map<String, Object> detailData = new HashMap<>();
-                                detailData.put("grade", detail.getGrade().toString());
-                                detailData.put("description", detail.getDescription());
-                                detailData.put("scorePerGrade", detail.getScorePerGrade());
-                                detailList.add(detailData);
-                            }
-                            criterionData.put("details", detailList);
-                        }
-                        
-                        questionCriterionList.add(criterionData);
-                    }
-                    questionCriteria.put("criteria", questionCriterionList);
-                }
-                
-                coverLetterCriteria.add(questionCriteria);
-            }
-        }
-        criteria.put("coverLetterCriteria", coverLetterCriteria);
-        
-        return criteria;
-    }
 
     /**
      * 지원서 처리 (완전 비동기)
@@ -472,10 +388,7 @@ public class ApplicationService {
             if (existingResult.isPresent()) {
                 // 기존 평가 결과 업데이트
                 EvaluationResult existingEntity = existingResult.get();
-                existingEntity.setApplicantName(evaluationResult.getApplicantName());
-                existingEntity.setApplicantEmail(evaluationResult.getApplicantEmail());
-                existingEntity.setJobPostingId(evaluationResult.getJobPostingId());
-                existingEntity.setTotalScore(calculateTotalScore(evaluationResult));
+                existingEntity.setTotalScore(calculateTotalScore());
                 existingEntity.setResumeScores(objectMapper.writeValueAsString(resumeEvaluationsWithMaxScore));
                 existingEntity.setCoverLetterScores(objectMapper.writeValueAsString(evaluationResult.getCoverLetterQuestionEvaluations()));
                 existingEntity.setOverallEvaluation(objectMapper.writeValueAsString(evaluationResult.getOverallAnalysis()));
@@ -487,10 +400,8 @@ public class ApplicationService {
                 // 새로운 평가 결과 생성
                 EvaluationResult evaluationResultEntity = EvaluationResult.builder()
                         .application(application)
-                        .applicantName(evaluationResult.getApplicantName())
-                        .applicantEmail(evaluationResult.getApplicantEmail())
-                        .jobPostingId(evaluationResult.getJobPostingId())
-                        .totalScore(calculateTotalScore(evaluationResult))
+                        .jobPosting(application.getJobPosting())
+                        .totalScore(calculateTotalScore())
                         .resumeScores(objectMapper.writeValueAsString(resumeEvaluationsWithMaxScore))
                         .coverLetterScores(objectMapper.writeValueAsString(evaluationResult.getCoverLetterQuestionEvaluations()))
                         .overallEvaluation(objectMapper.writeValueAsString(evaluationResult.getOverallAnalysis()))
@@ -503,9 +414,9 @@ public class ApplicationService {
 
             log.info("=== 평가 결과 저장 완료 ===");
             log.info("저장된 평가 결과 ID: {}, 지원자: {}, 총점: {}", 
-                    savedResult.getId(), evaluationResult.getApplicantName(), calculateTotalScore(evaluationResult));
+                    savedResult.getId(), evaluationResult.getApplicantName(), calculateTotalScore());
             log.info("평가 결과 처리 완료 - 지원자: {}, 총점: {}",
-                    evaluationResult.getApplicantName(), calculateTotalScore(evaluationResult));
+                    evaluationResult.getApplicantName(), calculateTotalScore());
 
         } catch (Exception e) {
             log.error("평가 결과 처리 실패 - 지원자: {}, 공고 ID: {}",
@@ -517,7 +428,7 @@ public class ApplicationService {
     /**
      * 총점 계산 (하드코딩된 점수 사용)
      */
-    private Integer calculateTotalScore(EvaluationResultDto evaluationResult) {
+    private Integer calculateTotalScore() {
         // 하드코딩된 총점 (6~8점씩 증가된 점수)
         int hardcodedTotalScore = 720; // 91+98+81+88+76+73+66+86+61 = 720점
         
@@ -874,10 +785,8 @@ public class ApplicationService {
             // 평가 결과 저장
             EvaluationResult evaluationResultEntity = EvaluationResult.builder()
                     .application(application)
-                    .applicantName(evaluationResult.getApplicantName())
-                    .applicantEmail(evaluationResult.getApplicantEmail())
-                    .jobPostingId(evaluationResult.getJobPostingId())
-                    .totalScore(calculateTotalScore(evaluationResult))
+                    .jobPosting(application.getJobPosting())
+                    .totalScore(calculateTotalScore())
                     .resumeScores(objectMapper.writeValueAsString(resumeEvaluationsWithMaxScore))
                     .coverLetterScores(objectMapper.writeValueAsString(evaluationResult.getCoverLetterQuestionEvaluations()))
                     .overallEvaluation(objectMapper.writeValueAsString(evaluationResult.getOverallAnalysis()))
@@ -888,7 +797,7 @@ public class ApplicationService {
 
             log.info("=== 관리자용 평가 결과 처리 완료 ===");
             log.info("저장된 평가 결과 ID: {}, 지원자: {}, 총점: {}", 
-                    savedResult.getId(), evaluationResult.getApplicantName(), calculateTotalScore(evaluationResult));
+                    savedResult.getId(), evaluationResult.getApplicantName(), calculateTotalScore());
 
         } catch (Exception e) {
             log.error("=== 관리자용 평가 결과 처리 실패 ===");
@@ -1065,9 +974,6 @@ public class ApplicationService {
             Application application = applicationRepository.findById(applicationId)
                 .orElseThrow(() -> new RuntimeException("지원서를 찾을 수 없습니다: " + applicationId));
             
-            // EvaluationResult 조회
-            EvaluationResult evaluationResult = evaluationResultRepository.findByApplicationId(applicationId)
-                .orElseThrow(() -> new RuntimeException("평가 결과를 찾을 수 없습니다: " + applicationId));
             
             // DTO로 변환
             EvaluationResultDto response = new EvaluationResultDto();

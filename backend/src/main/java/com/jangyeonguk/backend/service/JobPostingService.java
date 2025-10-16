@@ -1,32 +1,43 @@
 package com.jangyeonguk.backend.service;
 
-import com.jangyeonguk.backend.domain.Application;
-import com.jangyeonguk.backend.domain.CoverLetterQuestion;
-import com.jangyeonguk.backend.domain.CoverLetterQuestionCriterion;
-import com.jangyeonguk.backend.domain.CoverLetterQuestionCriterionDetail;
-import com.jangyeonguk.backend.domain.Company;
-import com.jangyeonguk.backend.domain.JobPosting;
-import com.jangyeonguk.backend.domain.PostingStatus;
-import com.jangyeonguk.backend.domain.ResumeItem;
-import com.jangyeonguk.backend.domain.ResumeItemCriterion;
-import com.jangyeonguk.backend.dto.jobposting.JobPostingCreateRequestDto;
-import com.jangyeonguk.backend.dto.jobposting.JobPostingResponseDto;
-import com.jangyeonguk.backend.repository.*;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.*;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
+
+import com.jangyeonguk.backend.domain.Company;
+import com.jangyeonguk.backend.domain.CoverLetterQuestion;
+import com.jangyeonguk.backend.domain.CoverLetterQuestionCriterion;
+import com.jangyeonguk.backend.domain.CoverLetterQuestionCriterionDetail;
+import com.jangyeonguk.backend.domain.JobPosting;
+import com.jangyeonguk.backend.domain.PostingStatus;
+import com.jangyeonguk.backend.domain.ResumeItem;
+import com.jangyeonguk.backend.domain.ResumeItemCriterion;
+import com.jangyeonguk.backend.dto.jobposting.JobPostingCreateRequestDto;
+import com.jangyeonguk.backend.dto.jobposting.JobPostingResponseDto;
+import com.jangyeonguk.backend.repository.CompanyRepository;
+import com.jangyeonguk.backend.repository.CoverLetterQuestionCriterionDetailRepository;
+import com.jangyeonguk.backend.repository.CoverLetterQuestionCriterionRepository;
+import com.jangyeonguk.backend.repository.CoverLetterQuestionRepository;
+import com.jangyeonguk.backend.repository.JobPostingRepository;
+import com.jangyeonguk.backend.repository.ResumeItemCriterionRepository;
+import com.jangyeonguk.backend.repository.ResumeItemRepository;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 채용공고 Service
@@ -38,7 +49,6 @@ import java.util.stream.Collectors;
 public class JobPostingService {
 
     private final JobPostingRepository jobPostingRepository;
-    private final ApplicationRepository applicationRepository;
     private final ResumeItemRepository resumeItemRepository;
     private final ResumeItemCriterionRepository resumeItemCriterionRepository;
     private final CoverLetterQuestionRepository coverLetterQuestionRepository;
@@ -411,40 +421,11 @@ public class JobPostingService {
             application.getCoverLetterQuestionAnswers().size();
             application.getApplicant().getName(); // applicant 정보 로드
             
-            // resumeQuantitativeScore 계산 및 저장
-            calculateAndSaveResumeQuantitativeScore(application);
         });
 
         return JobPostingResponseDto.fromWithApplications(jobPosting);
     }
     
-    /**
-     * 지원서의 resumeQuantitativeScore 계산 및 저장
-     */
-    private void calculateAndSaveResumeQuantitativeScore(Application application) {
-        try {
-            // resumeItemAnswers의 resumeScore 합계 계산
-            int totalResumeScore = application.getResumeItemAnswers().stream()
-                    .mapToInt(answer -> answer.getResumeScore() != null ? answer.getResumeScore() : 0)
-                    .sum();
-            
-            // 기존 값과 다르면 업데이트
-            if (application.getResumeQuantitativeScore() == null || 
-                !application.getResumeQuantitativeScore().equals(totalResumeScore)) {
-                
-                application.setResumeQuantitativeScore(totalResumeScore);
-                applicationRepository.save(application);
-                
-                log.info("resumeQuantitativeScore 업데이트 - Application ID: {}, 지원자: {}, 점수: {}점", 
-                        application.getId(), 
-                        application.getApplicant().getName(), 
-                        totalResumeScore);
-            }
-        } catch (Exception e) {
-            log.error("resumeQuantitativeScore 계산 실패 - Application ID: {}, Error: {}", 
-                    application.getId(), e.getMessage(), e);
-        }
-    }
 
     /**
      * 채용공고 수정
