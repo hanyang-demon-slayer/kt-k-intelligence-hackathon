@@ -10,6 +10,7 @@ import lombok.*;
 @Table(name = "cover_letter_question_answers")
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class CoverLetterQuestionAnswer {

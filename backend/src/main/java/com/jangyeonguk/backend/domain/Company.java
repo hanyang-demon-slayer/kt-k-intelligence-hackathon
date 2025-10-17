@@ -13,6 +13,7 @@ import java.util.List;
 @Table(name = "companies")
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class Company {

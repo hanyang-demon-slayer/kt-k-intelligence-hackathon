@@ -1,22 +1,11 @@
 package com.jangyeonguk.backend.service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
 
 import com.jangyeonguk.backend.domain.Company;
 import com.jangyeonguk.backend.domain.CoverLetterQuestion;
@@ -28,6 +17,8 @@ import com.jangyeonguk.backend.domain.ResumeItem;
 import com.jangyeonguk.backend.domain.ResumeItemCriterion;
 import com.jangyeonguk.backend.dto.jobposting.JobPostingCreateRequestDto;
 import com.jangyeonguk.backend.dto.jobposting.JobPostingResponseDto;
+import com.jangyeonguk.backend.dto.resume.ResumeItemCreateRequestDto;
+import com.jangyeonguk.backend.dto.coverletter.CoverLetterQuestionCreateRequestDto;
 import com.jangyeonguk.backend.repository.CompanyRepository;
 import com.jangyeonguk.backend.repository.CoverLetterQuestionCriterionDetailRepository;
 import com.jangyeonguk.backend.repository.CoverLetterQuestionCriterionRepository;
@@ -55,18 +46,14 @@ public class JobPostingService {
     private final CoverLetterQuestionCriterionRepository coverLetterQuestionCriterionRepository;
     private final CoverLetterQuestionCriterionDetailRepository coverLetterQuestionCriterionDetailRepository;
     private final CompanyRepository companyRepository;
-
-
-    @Value("${fastapi.base-url:http://localhost:8000}")
-    private String fastApiBaseUrl;
-
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final AIScoringService aiScoringService;
 
     /**
      * 채용공고 등록
      */
     @Transactional
     public JobPostingResponseDto createJobPosting(JobPostingCreateRequestDto request) {
+        
         // 회사 조회
         Company company = companyRepository.findAll().stream()
                 .findFirst()
@@ -78,9 +65,9 @@ public class JobPostingService {
                 .teamDepartment(request.getTeamDepartment())
                 .jobRole(request.getJobRole())
                 .employmentType(request.getEmploymentType())
-                .applicationStartDate(request.getApplicationStartDate() != null ? request.getApplicationStartDate().atStartOfDay() : null)
-                .applicationEndDate(request.getApplicationEndDate() != null ? request.getApplicationEndDate().atStartOfDay() : null)
-                .evaluationEndDate(request.getEvaluationEndDate() != null ? request.getEvaluationEndDate().atStartOfDay() : null)
+                .applicationStartDate(request.getApplicationStartDate())
+                .applicationEndDate(request.getApplicationEndDate())
+                .evaluationEndDate(request.getEvaluationEndDate())
                 .description(request.getDescription())
                 .experienceRequirements(request.getExperienceRequirements())
                 .educationRequirements(request.getEducationRequirements())
@@ -91,298 +78,47 @@ public class JobPostingService {
                 .passingScore(request.getPassingScore())
                 .aiAutomaticEvaluation(request.getAiAutomaticEvaluation())
                 .manualReview(request.getManualReview())
-                .postingStatus(request.getPostingStatus())
-                .company(company)
                 .build();
-
-        JobPosting savedJobPosting = jobPostingRepository.save(jobPosting);
+        
+        // 연관관계 편의 메서드 사용
+        company.addJobPosting(jobPosting);
 
         // 날짜에 따라 초기 상태 설정
-        PostingStatus initialStatus = determinePostingStatus(savedJobPosting, LocalDateTime.now());
-        savedJobPosting.setPostingStatus(initialStatus);
+        PostingStatus initialStatus = determinePostingStatus(jobPosting, LocalDateTime.now());
+        jobPosting.setPostingStatus(initialStatus);
         
-        // 공개 링크 URL 생성 (저장된 ID 사용)
-        String publicLinkUrl = generatePublicLinkUrl(savedJobPosting.getId());
-        savedJobPosting.setPublicLinkUrl(publicLinkUrl);
-        jobPostingRepository.save(savedJobPosting);
-
-        // ResumeItems 저장
+        // ResumeItems와 CoverLetterQuestions를 JobPosting에 추가
         if (request.getResumeItems() != null) {
             request.getResumeItems().forEach(resumeItemDto -> {
-                ResumeItem resumeItem = ResumeItem.builder()
-                        .name(resumeItemDto.getName())
-                        .type(resumeItemDto.getType())
-                        .isRequired(resumeItemDto.getIsRequired())
-                        .maxScore(resumeItemDto.getMaxScore())
-                        .jobPosting(savedJobPosting)
-                        .build();
-
-                ResumeItem savedResumeItem = resumeItemRepository.save(resumeItem);
-
-                // ResumeItemCriterions 저장
-                if (resumeItemDto.getCriteria() != null) {
-                    resumeItemDto.getCriteria().forEach(criterionDto -> {
-                        ResumeItemCriterion criterion = ResumeItemCriterion.builder()
-                                .grade(criterionDto.getGrade())
-                                .description(criterionDto.getDescription())
-                                .scorePerGrade(criterionDto.getScorePerGrade())
-                                .resumeItem(savedResumeItem)
-                                .build();
-
-                        resumeItemCriterionRepository.save(criterion);
-                    });
-                }
+                addResumeItemToJobPosting(jobPosting, resumeItemDto);
             });
         }
 
-        // CoverLetterQuestions 저장
         if (request.getCoverLetterQuestions() != null) {
             request.getCoverLetterQuestions().forEach(questionDto -> {
-                CoverLetterQuestion question = CoverLetterQuestion.builder()
-                        .content(questionDto.getContent())
-                        .isRequired(questionDto.getIsRequired())
-                        .maxCharacters(questionDto.getMaxCharacters())
-                        .jobPosting(savedJobPosting)
-                        .build();
-
-                CoverLetterQuestion savedQuestion = coverLetterQuestionRepository.save(question);
-
-                // CoverLetterQuestionCriterions 저장 부분 수정
-                if (questionDto.getCriteria() != null && !questionDto.getCriteria().isEmpty()) {
-                    questionDto.getCriteria().forEach(criterionDto -> {
-                        // name과 overallDescription이 null이 아닌 경우에만 저장
-                        if (criterionDto.getName() != null && !criterionDto.getName().trim().isEmpty()) {
-                            CoverLetterQuestionCriterion criterion = CoverLetterQuestionCriterion.builder()
-                                    .name(criterionDto.getName())
-                                    .overallDescription(criterionDto.getOverallDescription())
-                                    .coverLetterQuestion(savedQuestion)
-                                    .build();
-
-                            CoverLetterQuestionCriterion savedCriterion = coverLetterQuestionCriterionRepository.save(criterion);
-
-                            // CoverLetterQuestionCriterionDetails 저장
-                            if (criterionDto.getDetails() != null && !criterionDto.getDetails().isEmpty()) {
-                                criterionDto.getDetails().forEach(detailDto -> {
-                                    CoverLetterQuestionCriterionDetail detail = CoverLetterQuestionCriterionDetail.builder()
-                                            .grade(detailDto.getGrade())
-                                            .description(detailDto.getDescription())
-                                            .scorePerGrade(detailDto.getScorePerGrade())
-                                            .coverLetterQuestionCriterion(savedCriterion)
-                                            .build();
-
-                                    coverLetterQuestionCriterionDetailRepository.save(detail);
-                                });
-                            }
-                        }
-                    });
-                }
+                addCoverLetterQuestionToJobPosting(jobPosting, questionDto);
             });
         }
+
+        // 한 번에 모든 엔티티 저장 (CascadeType.ALL로 인해 연관 엔티티들도 자동 저장)
+        JobPosting savedJobPosting = jobPostingRepository.save(jobPosting);
+        
+        // 실제 ID로 URL 생성 및 설정
+        String publicLinkUrl = generatePublicLinkUrl(savedJobPosting.getId());
+        savedJobPosting.setPublicLinkUrl(publicLinkUrl);
+        
+        // URL 변경사항을 DB에 저장
+        jobPostingRepository.save(savedJobPosting);
 
         // JobPostingResponseDto 생성
         JobPostingResponseDto response = JobPostingResponseDto.from(savedJobPosting);
 
-        // FAST API에 평가 기준 학습 요청 (동기)
-        try {
-            log.info("평가 기준 학습 시작 - JobPosting ID: {}", savedJobPosting.getId());
-
-            // 강제로 모든 연관 데이터를 일일이 조회하여 로딩
-            JobPosting completeJobPosting = jobPostingRepository.findById(savedJobPosting.getId())
-                    .orElseThrow(() -> new RuntimeException("JobPosting not found: " + savedJobPosting.getId()));
-            
-            // ResumeItems 강제 로딩
-            List<ResumeItem> resumeItems = resumeItemRepository.findByJobPostingIdWithCriteria(savedJobPosting.getId());
-            log.info("Loaded ResumeItems count: {}", resumeItems.size());
-            
-            // 각 ResumeItem의 criteria를 일일이 조회하여 로딩
-            resumeItems.forEach(resumeItem -> {
-                List<ResumeItemCriterion> criteria = resumeItemCriterionRepository.findByResumeItemId(resumeItem.getId());
-                resumeItem.setCriteria(criteria);
-                log.info("Loaded criteria for ResumeItem {} ({}): {} criteria", resumeItem.getId(), resumeItem.getName(), criteria.size());
-            });
-            
-            completeJobPosting.setResumeItems(resumeItems);
-            
-            // CoverLetterQuestions 강제 로딩
-            List<CoverLetterQuestion> coverLetterQuestions = coverLetterQuestionRepository.findByJobPostingIdWithCriteria(savedJobPosting.getId());
-            log.info("Loaded CoverLetterQuestions count: {}", coverLetterQuestions.size());
-            
-            // CoverLetterQuestionCriterion의 criteria와 details 강제 로딩
-            coverLetterQuestions.forEach(question -> {
-                // 1단계: CoverLetterQuestionCriterion 로딩
-                List<CoverLetterQuestionCriterion> criteria = coverLetterQuestionCriterionRepository.findByCoverLetterQuestionId(question.getId());
-                log.info("Loaded criteria for CoverLetterQuestion {}: {} criteria", question.getId(), criteria.size());
-                
-                // 2단계: 각 Criterion의 details 로딩
-                criteria.forEach(criterion -> {
-                    List<CoverLetterQuestionCriterionDetail> details = 
-                            coverLetterQuestionCriterionDetailRepository.findByCoverLetterQuestionCriterionId(criterion.getId());
-                    criterion.setDetails(details);
-                    log.info("Loaded details for criterion {} ({}): {} details", criterion.getId(), criterion.getName(), details.size());
-                });
-                
-                question.setCriteria(criteria);
-            });
-            
-            completeJobPosting.setCoverLetterQuestions(coverLetterQuestions);
-            
-            // 완전한 데이터를 직접 전달하여 FastAPI 데이터 생성
-            Map<String, Object> evaluationData = createFastApiEvaluationData(completeJobPosting);
-            log.info("FastAPI로 전송할 JSON 데이터: {}", evaluationData);
-            String fastApiResponse = sendEvaluationDataToFastApi(evaluationData);
-
-            log.info("평가 기준 학습 완료 - JobPosting ID: {}, Response: {}", savedJobPosting.getId(), fastApiResponse);
-
-        } catch (Exception e) {
-            log.error("FAST API 연동 실패 - JobPosting ID: {}", savedJobPosting.getId(), e);
-            throw new RuntimeException("평가 기준 학습에 실패했습니다: " + e.getMessage());
-        }
+        // AI 평가 기준 학습
+        aiScoringService.processJobPostingEvaluation(savedJobPosting);
 
         return response;
     }
 
-    /**
-     * 완전한 JobPosting 데이터로 FastAPI 평가 데이터 생성
-     */
-    private Map<String, Object> createFastApiEvaluationData(JobPosting jobPosting) {
-        Map<String, Object> evaluationData = new HashMap<>();
-
-        evaluationData.put("jobPostingId", jobPosting.getId());
-        evaluationData.put("title", jobPosting.getTitle());
-        evaluationData.put("companyName", jobPosting.getCompany().getName());
-        evaluationData.put("jobRole", jobPosting.getJobRole());
-        evaluationData.put("totalScore", jobPosting.getTotalScore());
-        evaluationData.put("passingScore", jobPosting.getPassingScore());
-        evaluationData.put("aiAutomaticEvaluation", jobPosting.getAiAutomaticEvaluation());
-        evaluationData.put("manualReview", jobPosting.getManualReview());
-        evaluationData.put("timestamp", System.currentTimeMillis());
-
-        // 이력서 항목 데이터 (강제로 로딩)
-        log.info("Processing ResumeItems - count: {}", jobPosting.getResumeItems() != null ? jobPosting.getResumeItems().size() : 0);
-        if (jobPosting.getResumeItems() != null && !jobPosting.getResumeItems().isEmpty()) {
-            evaluationData.put("resumeItems", jobPosting.getResumeItems().stream()
-                    .filter(item -> {
-                        // 이름, 이메일 등 점수 관련 내용이 없는 항목은 제외
-                        String itemName = item.getName();
-                        if ("이름".equals(itemName) || "이메일".equals(itemName)) {
-                            return false;
-                        }
-                        
-                        // maxScore가 0인 경우만 제외 (평가 기준이 없어도 포함)
-                        if (item.getMaxScore() == null || item.getMaxScore() == 0) {
-                            return false;
-                        }
-                        
-                        return true;
-                    })
-                    .map(item -> {
-                        Map<String, Object> itemData = new HashMap<>();
-                        itemData.put("id", item.getId());
-                        itemData.put("name", item.getName());
-                        itemData.put("type", item.getType());
-                        itemData.put("scoreWeight", item.getMaxScore()); // maxScore를 scoreWeight로 사용
-                        itemData.put("isRequired", item.getIsRequired());
-
-                        // 평가 기준 데이터 (없어도 빈 배열로 포함)
-                        if (item.getCriteria() != null && !item.getCriteria().isEmpty()) {
-                            itemData.put("criteria", item.getCriteria().stream()
-                                    .map(criterion -> {
-                                        Map<String, Object> criterionData = new HashMap<>();
-                                        criterionData.put("grade", criterion.getGrade());
-                                        criterionData.put("description", criterion.getDescription());
-                                        criterionData.put("scorePerGrade", criterion.getScorePerGrade());
-                                        return criterionData;
-                                    })
-                                    .collect(Collectors.toList()));
-                        } else {
-                            itemData.put("criteria", new ArrayList<>());
-                        }
-
-                        return itemData;
-                    })
-                    .collect(Collectors.toList()));
-        } else {
-            evaluationData.put("resumeItems", new ArrayList<>());
-            log.info("No ResumeItems found, setting empty array");
-        }
-
-        // 자기소개서 질문 데이터 (강제로 로딩)
-        log.info("Processing CoverLetterQuestions - count: {}", jobPosting.getCoverLetterQuestions() != null ? jobPosting.getCoverLetterQuestions().size() : 0);
-        if (jobPosting.getCoverLetterQuestions() != null && !jobPosting.getCoverLetterQuestions().isEmpty()) {
-            evaluationData.put("coverLetterQuestions", jobPosting.getCoverLetterQuestions().stream()
-                    .map(question -> {
-                        Map<String, Object> questionData = new HashMap<>();
-                        questionData.put("id", question.getId());
-                        questionData.put("content", question.getContent());
-                        questionData.put("isRequired", question.getIsRequired());
-                        questionData.put("maxCharacters", question.getMaxCharacters());
-
-                        // 평가 기준 데이터 (새로운 구조: criteria -> details)
-                        if (question.getCriteria() != null && !question.getCriteria().isEmpty()) {
-                            questionData.put("criteria", question.getCriteria().stream()
-                                    .map(criterion -> {
-                                        Map<String, Object> criterionData = new HashMap<>();
-                                        criterionData.put("name", criterion.getName());
-
-                                        // 상세 기준 데이터를 details로 변경
-                                        if (criterion.getDetails() != null && !criterion.getDetails().isEmpty()) {
-                                            criterionData.put("details", criterion.getDetails().stream()
-                                                    .map(detail -> {
-                                                        Map<String, Object> detailData = new HashMap<>();
-                                                        detailData.put("grade", detail.getGrade());
-                                                        detailData.put("description", detail.getDescription());
-                                                        // score_per_grade는 자기소개서에서는 제거 (새로운 구조에 없음)
-                                                        return detailData;
-                                                    })
-                                                    .collect(Collectors.toList()));
-                                        } else {
-                                            criterionData.put("details", new ArrayList<>());
-                                        }
-
-                                        return criterionData;
-                                    })
-                                    .collect(Collectors.toList()));
-                        } else {
-                            questionData.put("criteria", new ArrayList<>());
-                        }
-
-                        return questionData;
-                    })
-                    .collect(Collectors.toList()));
-        } else {
-            evaluationData.put("coverLetterQuestions", new ArrayList<>());
-            log.info("No CoverLetterQuestions found, setting empty array");
-        }
-
-        return evaluationData;
-    }
-
-    /**
-     * FAST API에 평가 기준 데이터 전송 (동기)
-     */
-    private String sendEvaluationDataToFastApi(Map<String, Object> evaluationData) {
-        try {
-            String url = fastApiBaseUrl + "/api/evaluation-criteria/train";
-            log.info("FastAPI로 데이터 전송 시작 - URL: {}, Data: {}", url, evaluationData);
-
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-
-            HttpEntity<Map<String, Object>> request = new HttpEntity<>(evaluationData, headers);
-
-            ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
-
-            if (response.getStatusCode() == HttpStatus.OK) {
-                return response.getBody();
-            } else {
-                throw new RuntimeException("FAST API 응답 오류: " + response.getStatusCode());
-            }
-
-        } catch (Exception e) {
-            log.error("FAST API 통신 실패", e);
-            throw new RuntimeException("FAST API 통신 실패: " + e.getMessage());
-        }
-    }
 
     /**
      * 채용공고 조회
@@ -441,9 +177,9 @@ public class JobPostingService {
         existingJobPosting.setTeamDepartment(request.getTeamDepartment());
         existingJobPosting.setJobRole(request.getJobRole());
         existingJobPosting.setEmploymentType(request.getEmploymentType());
-        existingJobPosting.setApplicationStartDate(request.getApplicationStartDate() != null ? request.getApplicationStartDate().atStartOfDay() : null);
-        existingJobPosting.setApplicationEndDate(request.getApplicationEndDate() != null ? request.getApplicationEndDate().atStartOfDay() : null);
-        existingJobPosting.setEvaluationEndDate(request.getEvaluationEndDate() != null ? request.getEvaluationEndDate().atStartOfDay() : null);
+        existingJobPosting.setApplicationStartDate(request.getApplicationStartDate());
+        existingJobPosting.setApplicationEndDate(request.getApplicationEndDate());
+        existingJobPosting.setEvaluationEndDate(request.getEvaluationEndDate());
         existingJobPosting.setDescription(request.getDescription());
         existingJobPosting.setExperienceRequirements(request.getExperienceRequirements());
         existingJobPosting.setEducationRequirements(request.getEducationRequirements());
@@ -455,16 +191,10 @@ public class JobPostingService {
         existingJobPosting.setAiAutomaticEvaluation(request.getAiAutomaticEvaluation());
         existingJobPosting.setManualReview(request.getManualReview());
         
-        // 상태 업데이트 (요청에서 받은 상태 사용)
-        if (request.getPostingStatus() != null) {
-            log.info("채용공고 상태 수동 업데이트: {} -> {}", existingJobPosting.getPostingStatus(), request.getPostingStatus());
-            existingJobPosting.setPostingStatus(request.getPostingStatus());
-        } else {
-            // 상태가 제공되지 않은 경우에만 자동 설정
-            PostingStatus updatedStatus = determinePostingStatus(existingJobPosting, LocalDateTime.now());
-            log.info("채용공고 상태 자동 업데이트: {} -> {}", existingJobPosting.getPostingStatus(), updatedStatus);
-            existingJobPosting.setPostingStatus(updatedStatus);
-        }
+        // 상태는 항상 자동으로 결정 (날짜 기반)
+        PostingStatus updatedStatus = determinePostingStatus(existingJobPosting, LocalDateTime.now());
+        log.info("채용공고 상태 자동 업데이트: {} -> {}", existingJobPosting.getPostingStatus(), updatedStatus);
+        existingJobPosting.setPostingStatus(updatedStatus);
 
         // 기존 ResumeItems와 CoverLetterQuestions는 삭제하지 않고 상태만 업데이트
         // (기존 지원서 데이터 보존을 위해)
@@ -638,6 +368,75 @@ public class JobPostingService {
     public void scheduledUpdateJobPostingStatuses() {
         log.info("스케줄된 채용공고 상태 업데이트 실행");
         updateJobPostingStatuses();
+    }
+
+    /**
+     * ResumeItem을 JobPosting에 추가하는 편의 메서드
+     */
+    private void addResumeItemToJobPosting(JobPosting jobPosting, ResumeItemCreateRequestDto resumeItemDto) {
+        ResumeItem resumeItem = ResumeItem.builder()
+                .name(resumeItemDto.getName())
+                .type(resumeItemDto.getType())
+                .isRequired(resumeItemDto.getIsRequired())
+                .maxScore(resumeItemDto.getMaxScore())
+                .build();
+
+        // 연관관계 편의 메서드 사용
+        jobPosting.addResumeItem(resumeItem);
+
+        // ResumeItemCriterions 추가
+        if (resumeItemDto.getCriteria() != null) {
+            resumeItemDto.getCriteria().forEach(criterionDto -> {
+                ResumeItemCriterion criterion = ResumeItemCriterion.builder()
+                        .grade(criterionDto.getGrade())
+                        .description(criterionDto.getDescription())
+                        .scorePerGrade(criterionDto.getScorePerGrade())
+                        .build();
+                
+                resumeItem.addCriterion(criterion);
+            });
+        }
+    }
+
+    /**
+     * CoverLetterQuestion을 JobPosting에 추가하는 편의 메서드
+     */
+    private void addCoverLetterQuestionToJobPosting(JobPosting jobPosting, CoverLetterQuestionCreateRequestDto questionDto) {
+        CoverLetterQuestion question = CoverLetterQuestion.builder()
+                .content(questionDto.getContent())
+                .isRequired(questionDto.getIsRequired())
+                .maxCharacters(questionDto.getMaxCharacters())
+                .build();
+
+        // 연관관계 편의 메서드 사용
+        jobPosting.addCoverLetterQuestion(question);
+
+        // CoverLetterQuestionCriterions 추가
+        if (questionDto.getCriteria() != null && !questionDto.getCriteria().isEmpty()) {
+            questionDto.getCriteria().forEach(criterionDto -> {
+                if (criterionDto.getName() != null && !criterionDto.getName().trim().isEmpty()) {
+                    CoverLetterQuestionCriterion criterion = CoverLetterQuestionCriterion.builder()
+                            .name(criterionDto.getName())
+                            .overallDescription(criterionDto.getOverallDescription())
+                            .build();
+
+                    question.addCriterion(criterion);
+
+                    // CoverLetterQuestionCriterionDetails 추가
+                    if (criterionDto.getDetails() != null && !criterionDto.getDetails().isEmpty()) {
+                        criterionDto.getDetails().forEach(detailDto -> {
+                            CoverLetterQuestionCriterionDetail detail = CoverLetterQuestionCriterionDetail.builder()
+                                    .grade(detailDto.getGrade())
+                                    .description(detailDto.getDescription())
+                                    .scorePerGrade(detailDto.getScorePerGrade())
+                                    .build();
+                            
+                            criterion.addDetail(detail);
+                        });
+                    }
+                }
+            });
+        }
     }
 
 }

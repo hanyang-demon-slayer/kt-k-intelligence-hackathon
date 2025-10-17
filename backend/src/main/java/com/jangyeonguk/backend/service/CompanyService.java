@@ -30,11 +30,12 @@ public class CompanyService {
             throw new IllegalArgumentException("이미 등록된 회사입니다: " + request.getName());
         }
 
-        Company company = new Company();
-        company.setName(request.getName());
+        Company company = Company.builder()
+                .name(request.getName())
+                .build();
 
         Company savedCompany = companyRepository.save(company);
-        return convertToResponseDto(savedCompany);
+        return CompanyResponseDto.from(savedCompany);
     }
 
     /**
@@ -45,13 +46,7 @@ public class CompanyService {
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("등록된 회사가 없습니다."));
 
-        return convertToResponseDto(company);
+        return CompanyResponseDto.from(company);
     }
 
-    /**
-     * Company 엔티티를 CompanyResponseDto로 변환
-     */
-    private CompanyResponseDto convertToResponseDto(Company company) {
-        return new CompanyResponseDto(company.getId(), company.getName());
-    }
 }

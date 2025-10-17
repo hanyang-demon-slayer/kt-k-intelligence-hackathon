@@ -55,14 +55,6 @@ export const useJobPosting = (id: number) => {
   });
 };
 
-// 공개 채용공고 조회 (지원자용)
-export const usePublicJobPosting = (id: number) => {
-  return useQuery<JobPostingResponseDto>({
-    queryKey: ['publicJobPosting', id],
-    queryFn: () => jobPostingApi.getPublicJobPosting(id),
-    enabled: !!id,
-  });
-};
 
 // 채용공고 생성/수정 뮤테이션
 export const useJobPostingMutation = () => {
