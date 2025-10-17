@@ -56,7 +56,7 @@ services:
   # Frontend Service
   frontend:
     build:
-      context: ./frontend_figma
+      context: ./frontend
       dockerfile: Dockerfile
     container_name: kt-hackathon-frontend
     environment:

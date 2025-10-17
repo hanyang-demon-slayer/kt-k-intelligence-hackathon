@@ -1,10 +1,9 @@
 package com.jangyeonguk.backend.repository;
 
-import com.jangyeonguk.backend.domain.Company;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.Optional;
+import com.jangyeonguk.backend.domain.Company;
 
 /**
  * 회사 Repository
