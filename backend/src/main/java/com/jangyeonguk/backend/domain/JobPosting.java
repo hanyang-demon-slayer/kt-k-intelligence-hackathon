@@ -208,58 +208,9 @@ public class JobPosting {
             throw new IllegalStateException("합격기준점수는 총점보다 작아야 합니다.");
         }
         
-        // 자기소개서 질문별 점수 총합 검증
-        validateCoverLetterQuestionScores();
-        
-        // 이력서 항목별 점수 총합 검증
-        validateResumeItemScores();
     }
     
-    /**
-     * 자기소개서 질문별 점수 총합이 coverLetterScoreWeight와 일치하는지 검증
-     */
-    private void validateCoverLetterQuestionScores() {
-        if (this.coverLetterQuestions == null || this.coverLetterQuestions.isEmpty()) {
-            return;
-        }
-        
-        int totalQuestionScore = this.coverLetterQuestions.stream()
-            .filter(question -> question.getMaxScore() != null)
-            .mapToInt(CoverLetterQuestion::getMaxScore)
-            .sum();
-            
-        int expectedScore = this.coverLetterScoreWeight != null ? this.coverLetterScoreWeight : 0;
-        
-        if (totalQuestionScore != expectedScore) {
-            throw new IllegalStateException(
-                String.format("자기소개서 질문별 점수 총합(%d)이 자기소개서 배점 비중(%d)과 일치하지 않습니다.", 
-                    totalQuestionScore, expectedScore)
-            );
-        }
-    }
     
-    /**
-     * 이력서 항목별 점수 총합이 resumeScoreWeight와 일치하는지 검증
-     */
-    private void validateResumeItemScores() {
-        if (this.resumeItems == null || this.resumeItems.isEmpty()) {
-            return;
-        }
-        
-        int totalItemScore = this.resumeItems.stream()
-            .filter(item -> item.getMaxScore() != null)
-            .mapToInt(ResumeItem::getMaxScore)
-            .sum();
-            
-        int expectedScore = this.resumeScoreWeight != null ? this.resumeScoreWeight : 0;
-        
-        if (totalItemScore != expectedScore) {
-            throw new IllegalStateException(
-                String.format("이력서 항목별 점수 총합(%d)이 이력서 배점 비중(%d)과 일치하지 않습니다.", 
-                    totalItemScore, expectedScore)
-            );
-        }
-    }
 
     // EvaluationResult 편의 메서드
     public void addEvaluationResult(EvaluationResult evaluationResult) {

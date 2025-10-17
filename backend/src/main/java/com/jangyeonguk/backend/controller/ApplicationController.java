@@ -20,13 +20,11 @@ import com.jangyeonguk.backend.dto.application.ApplicationResponseDto;
 import com.jangyeonguk.backend.dto.evaluation.EvaluationResultDto;
 import com.jangyeonguk.backend.dto.evaluation.EvaluationResultResponseDto;
 import com.jangyeonguk.backend.service.ApplicationService;
+import com.jangyeonguk.backend.service.AIScoringService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
-// api/community/[기능에따라 바뀜]
-// 게시글 조회(GET), 수정(PUT)
-// api/community/post/1(게시글의 아이디)
+import jakarta.validation.Valid;
 
 /**
  * 지원서 Controller
@@ -38,6 +36,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ApplicationController {
 
     private final ApplicationService applicationService;
+    private final AIScoringService aiScoringService;
 
     /**
      * 지원서 제출
@@ -45,7 +44,7 @@ public class ApplicationController {
     @PostMapping("/job-postings/{jobPostingId}")
     public ResponseEntity<ApplicationResponseDto> submitApplication(
             @PathVariable Long jobPostingId,
-            @RequestBody ApplicationCreateRequestDto request) {
+            @Valid @RequestBody ApplicationCreateRequestDto request) {
         ApplicationResponseDto response = applicationService.submitApplication(jobPostingId, request);
         return ResponseEntity.ok(response);
     }
@@ -131,7 +130,7 @@ public class ApplicationController {
             log.info("FastAPI에서 평가 결과 조회 및 저장 요청 - Application ID: {}", applicationId);
             
             // 1. FastAPI에서 평가 결과 조회
-            Map<String, Object> fastApiResponse = applicationService.getEvaluationResultFromFastApi(applicationId);
+            Map<String, Object> fastApiResponse = aiScoringService.getEvaluationResultFromAI(applicationId);
             
             // 2. FastAPI 응답이 성공적이고 평가 결과가 있는 경우
             if (fastApiResponse != null && 

@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import jakarta.validation.Valid;
 
 /**
  * 채용공고 Controller
@@ -23,7 +24,7 @@ public class JobPostingController {
      * 채용공고 등록
      */
     @PostMapping
-    public ResponseEntity<JobPostingResponseDto> createJobPosting(@RequestBody JobPostingCreateRequestDto request) {
+    public ResponseEntity<JobPostingResponseDto> createJobPosting(@Valid @RequestBody JobPostingCreateRequestDto request) {
         JobPostingResponseDto response = jobPostingService.createJobPosting(request);
         return ResponseEntity.ok(response);
     }
@@ -46,14 +47,6 @@ public class JobPostingController {
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * 공개 채용공고 조회 (지원자용)
-     */
-    @GetMapping("/public/{id}")
-    public ResponseEntity<JobPostingResponseDto> getPublicJobPosting(@PathVariable Long id) {
-        JobPostingResponseDto response = jobPostingService.getJobPosting(id);
-        return ResponseEntity.ok(response);
-    }
 
     /**
      * 채용공고 수정

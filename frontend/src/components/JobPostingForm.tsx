@@ -647,7 +647,7 @@ export function JobPostingForm({ onBack, editingWorkspace, isEditMode = false }:
       };
     });
 
-    // 날짜 형식 변환 (YYYY-MM-DD)
+    // 날짜 형식 변환
     const formatDateTime = (dateStr: string) => {
       if (!dateStr) return new Date().toISOString().split('T')[0];
       return new Date(dateStr).toISOString().split('T')[0];

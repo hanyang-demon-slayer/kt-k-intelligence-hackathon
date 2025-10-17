@@ -20,18 +20,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.*;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.stereotype.Service;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
-import jakarta.annotation.PostConstruct;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 /**
@@ -51,43 +44,16 @@ public class ApplicationService {
     private final ResumeItemAnswerRepository resumeItemAnswerRepository;
     private final CoverLetterQuestionAnswerRepository coverLetterQuestionAnswerRepository;
     private final EvaluationResultRepository evaluationResultRepository;
+    private final AIScoringService aiScoringService;
 
-    @Value("${fastapi.base-url:http://localhost:8000}")
-    private String fastApiBaseUrl;
-
-    private RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
-    
-    @PostConstruct
-    public void initRestTemplate() {
-        // 1분(60초) 타임아웃 설정
-        org.springframework.http.client.SimpleClientHttpRequestFactory factory = new org.springframework.http.client.SimpleClientHttpRequestFactory();
-        factory.setConnectTimeout(60000); // 60초 연결 타임아웃
-        factory.setReadTimeout(60000);    // 60초 읽기 타임아웃
-        
-        this.restTemplate = new RestTemplate(factory);
-        
-        // 기존 MessageConverter 제거
-        this.restTemplate.getMessageConverters().clear();
-        
-        // camelCase 설정된 ObjectMapper로 새로운 MessageConverter 생성
-        ObjectMapper camelCaseMapper = new ObjectMapper();
-        camelCaseMapper.setPropertyNamingStrategy(PropertyNamingStrategies.LOWER_CAMEL_CASE);
-        
-        MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
-        converter.setObjectMapper(camelCaseMapper);
-        
-        // 기본 MessageConverter들 추가
-        this.restTemplate.getMessageConverters().add(new org.springframework.http.converter.StringHttpMessageConverter());
-        this.restTemplate.getMessageConverters().add(converter);
-        this.restTemplate.getMessageConverters().add(new org.springframework.http.converter.FormHttpMessageConverter());
-    }
 
     /**
      * 지원서 제출
      */
     @Transactional
     public ApplicationResponseDto submitApplication(Long jobPostingId, ApplicationCreateRequestDto request) {
+        
         // 채용공고 조회
         JobPosting jobPosting = jobPostingRepository.findById(jobPostingId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 채용공고입니다: " + jobPostingId));
@@ -102,11 +68,15 @@ public class ApplicationService {
                 });
 
         // 지원서 생성
-        Application application = new Application();
-        application.setStatus(ApplicationStatus.BEFORE_EVALUATION);
-        application.setApplicant(applicant);
-        application.setJobPosting(jobPosting);
+        Application application = Application.builder()
+                .status(ApplicationStatus.BEFORE_EVALUATION)
+                .build();
+        
+        // 양방향 관계 설정
+        applicant.addApplication(application);
+        jobPosting.addApplication(application);
 
+        // 지원서 저장
         Application savedApplication = applicationRepository.save(application);
 
         // 이력서 항목 답변 저장
@@ -115,10 +85,13 @@ public class ApplicationService {
                 ResumeItem resumeItem = resumeItemRepository.findById(answerDto.getResumeItemId())
                         .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 이력서 항목입니다: " + answerDto.getResumeItemId()));
 
-                ResumeItemAnswer answer = new ResumeItemAnswer();
-                answer.setResumeContent(answerDto.getResumeContent());
-                answer.setApplication(savedApplication);
-                answer.setResumeItem(resumeItem);
+                ResumeItemAnswer answer = ResumeItemAnswer.builder()
+                        .resumeContent(answerDto.getResumeContent())
+                        .resumeItem(resumeItem)
+                        .build();
+                
+                // 양방향 관계 설정
+                savedApplication.addResumeItemAnswer(answer);
                 resumeItemAnswerRepository.save(answer);
             });
         }
@@ -129,180 +102,26 @@ public class ApplicationService {
                 CoverLetterQuestion question = coverLetterQuestionRepository.findById(answerDto.getCoverLetterQuestionId())
                         .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 자기소개서 질문입니다: " + answerDto.getCoverLetterQuestionId()));
 
-                CoverLetterQuestionAnswer answer = new CoverLetterQuestionAnswer();
-                answer.setAnswerContent(answerDto.getAnswerContent());
-                answer.setApplication(savedApplication);
-                answer.setCoverLetterQuestion(question);
-
+                CoverLetterQuestionAnswer answer = CoverLetterQuestionAnswer.builder()
+                        .answerContent(answerDto.getAnswerContent())
+                        .coverLetterQuestion(question)
+                        .build();
+                
+                // 양방향 관계 설정 
+                savedApplication.addCoverLetterQuestionAnswer(answer);
                 coverLetterQuestionAnswerRepository.save(answer);
             });
         }
 
-        // FastAPI에 지원서 데이터 전송 (완전 비동기) - 응답 대기 안함
-        Map<String, Object> applicationData = createApplicationDataForFastApi(savedApplication, request);
-        processApplicationAsync(savedApplication.getId(), applicationData);
-        
-        log.info("지원서 제출 완료 - Application ID: {} (FastAPI 평가는 백그라운드에서 진행)", savedApplication.getId());
+        // AI 평가 요청
+        aiScoringService.processApplicationEvaluation(savedApplication, request);
 
         return ApplicationResponseDto.from(savedApplication);
     }
 
-    /**
-     * FastAPI로 보낼 지원서 데이터 생성
-     */
-    private Map<String, Object> createApplicationDataForFastApi(Application application, ApplicationCreateRequestDto request) {
-        Map<String, Object> data = new HashMap<>();
-
-        // 지원자 정보
-        data.put("applicantId", application.getApplicant().getId());
-        data.put("applicantName", application.getApplicant().getName());
-        data.put("applicantEmail", application.getApplicant().getEmail());
-
-        // 지원서 정보
-        data.put("applicationId", application.getId());
-        data.put("jobPostingId", application.getJobPosting().getId());
-
-        // 이력서 답변 정보
-        if (request.getResumeItemAnswers() != null) {
-            data.put("resumeItemAnswers", request.getResumeItemAnswers().stream()
-                    .map(answer -> {
-                        Map<String, Object> answerData = new HashMap<>();
-                        answerData.put("resumeItemId", answer.getResumeItemId());
-                        answerData.put("resumeItemName", answer.getResumeItemName());
-                        answerData.put("resumeContent", answer.getResumeContent());
-                        return answerData;
-                    })
-                    .collect(Collectors.toList()));
-        }
-
-        // 자기소개서 답변 정보
-        if (request.getCoverLetterQuestionAnswers() != null) {
-            data.put("coverLetterQuestionAnswers", request.getCoverLetterQuestionAnswers().stream()
-                    .map(answer -> {
-                        Map<String, Object> answerData = new HashMap<>();
-                        answerData.put("coverLetterQuestionId", answer.getCoverLetterQuestionId());
-                        answerData.put("questionContent", answer.getQuestionContent());
-                        answerData.put("answerContent", answer.getAnswerContent());
-                        return answerData;
-                    })
-                    .collect(Collectors.toList()));
-        }
-
-        // 생성된 데이터 로깅
-        try {
-            String jsonData = objectMapper.writeValueAsString(data);
-            log.info("=== FASTAPI로 보낼 지원서 데이터 ===");
-            log.info("Application ID: {}", application.getId());
-            log.info("Applicant: {} ({})", application.getApplicant().getName(), application.getApplicant().getEmail());
-            log.info("Job Posting ID: {}", application.getJobPosting().getId());
-            log.info("JSON Data: {}", jsonData);
-            log.info("=== FASTAPI 데이터 끝 ===");
-        } catch (Exception e) {
-            log.error("FASTAPI 데이터 로깅 실패: {}", e.getMessage());
-        }
-
-        return data;
-    }
 
 
-    /**
-     * 지원서 처리 (완전 비동기)
-     */
-    public void processApplicationAsync(Long applicationId, Map<String, Object> applicationData) {
-        CompletableFuture.runAsync(() -> {
-            try {
-                log.info("FastAPI 평가 시작 - Application ID: {}", applicationId);
 
-                // FastAPI에 데이터 전송 (응답 무시)
-                sendApplicationDataToFastApi(applicationData);
-
-                log.info("FastAPI 평가 요청 완료 - Application ID: {} (백그라운드에서 평가 진행)", applicationId);
-
-            } catch (Exception e) {
-                log.error("FastAPI 평가 요청 실패 - Application ID: {}", applicationId, e);
-            }
-        });
-    }
-
-    /**
-     * FastAPI에 지원서 데이터 전송 (진짜 Fire-and-Forget)
-     */
-    private void sendApplicationDataToFastApi(Map<String, Object> applicationData) {
-        String url = fastApiBaseUrl + "/api/applications/submit";
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
-        // 전송할 데이터 로깅
-        try {
-            log.info("FastAPI로 전송할 데이터: {}", objectMapper.writeValueAsString(applicationData));
-        } catch (Exception e) {
-            log.warn("데이터 로깅 실패: {}", e.getMessage());
-        }
-
-        HttpEntity<Map<String, Object>> request = new HttpEntity<>(applicationData, headers);
-
-        // 진짜 비동기로 전송 (별도 스레드에서 실행)
-        CompletableFuture.runAsync(() -> {
-            try {
-                // 매우 짧은 타임아웃으로 설정
-                org.springframework.http.client.SimpleClientHttpRequestFactory factory = new org.springframework.http.client.SimpleClientHttpRequestFactory();
-                factory.setConnectTimeout(3000);  // 3초 연결 타임아웃
-                factory.setReadTimeout(3000);     // 3초 읽기 타임아웃
-                
-                RestTemplate asyncRestTemplate = new RestTemplate(factory);
-                asyncRestTemplate.postForObject(url, request, String.class);
-                
-                log.info("FastAPI로 데이터 전송 완료 (비동기)");
-            } catch (Exception e) {
-                log.warn("FastAPI 비동기 전송 실패 (무시됨): {}", e.getMessage());
-            }
-        });
-        
-        log.info("FastAPI 전송 요청 시작 (비동기)");
-    }
-
-    /**
-     * FastAPI에서 평가 결과 조회
-     */
-    public Map<String, Object> getEvaluationResultFromFastApi(Long applicationId) {
-        try {
-            String url = fastApiBaseUrl + "/api/applications/" + applicationId + "/evaluation-result";
-            log.info("FastAPI에서 평가 결과 조회 - URL: {}", url);
-
-            // 짧은 타임아웃으로 설정
-            org.springframework.http.client.SimpleClientHttpRequestFactory factory = new org.springframework.http.client.SimpleClientHttpRequestFactory();
-            factory.setConnectTimeout(5000);  // 5초 연결 타임아웃
-            factory.setReadTimeout(5000);     // 5초 읽기 타임아웃
-            
-            RestTemplate restTemplate = new RestTemplate(factory);
-            @SuppressWarnings("rawtypes")
-            ResponseEntity<Map> response = restTemplate.getForEntity(url, Map.class);
-
-            if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
-                @SuppressWarnings("unchecked")
-                Map<String, Object> result = response.getBody();
-                log.info("FastAPI에서 평가 결과 조회 성공 - Application ID: {}", applicationId);
-                return result;
-            } else {
-                return Map.of(
-                    "success", false,
-                    "message", "평가 결과를 찾을 수 없습니다. 평가가 아직 완료되지 않았습니다.",
-                    "applicationId", applicationId,
-                    "evaluationResult", null
-                );
-            }
-
-        } catch (Exception e) {
-            log.error("FastAPI에서 평가 결과 조회 실패 - Application ID: {}", applicationId, e);
-            return Map.of(
-                "success", false,
-                "message", "평가 결과 조회 중 오류가 발생했습니다: " + e.getMessage(),
-                "applicationId", applicationId,
-                "evaluationResult", null
-            );
-        }
-    }
 
     /**
      * 평가 결과 처리

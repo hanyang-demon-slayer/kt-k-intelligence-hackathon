@@ -21,11 +21,6 @@ export const jobPostingApi = {
     return response.data;
   },
   
-  // 공개 채용공고 조회 (지원자용)
-  getPublicJobPosting: async (id: number): Promise<JobPostingResponseDto> => {
-    const response = await api.get(`/job-postings/public/${id}`);
-    return response.data;
-  },
   
   // 채용공고 수정
   updateJobPosting: async (id: number, jobPostingData: JobPostingCreateRequestDto): Promise<JobPostingResponseDto> => {

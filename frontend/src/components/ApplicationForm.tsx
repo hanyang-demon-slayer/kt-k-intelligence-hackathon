@@ -22,7 +22,7 @@ import {
   CheckCircle,
   Home
 } from 'lucide-react';
-import { usePublicJobPosting, useApplicationSubmission } from '../hooks/useApi';
+import { useJobPosting, useApplicationSubmission } from '../hooks/useApi';
 import { 
   JobPostingResponseDto, 
   ResumeItemResponseDto, 
@@ -119,7 +119,7 @@ const ApplicationForm: React.FC = () => {
     hours: ''
   });
 
-  const { data: jobPosting, isLoading, error } = usePublicJobPosting(parseInt(id || '0'));
+  const { data: jobPosting, isLoading, error } = useJobPosting(parseInt(id || '0'));
   const submitApplicationMutation = useApplicationSubmission();
 
   useEffect(() => {
