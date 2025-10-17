@@ -1,21 +1,28 @@
 package com.jangyeonguk.backend.controller;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.jangyeonguk.backend.dto.application.ApplicationCreateRequestDto;
 import com.jangyeonguk.backend.dto.application.ApplicationResponseDto;
 import com.jangyeonguk.backend.dto.evaluation.EvaluationResultDto;
 import com.jangyeonguk.backend.dto.evaluation.EvaluationResultResponseDto;
 import com.jangyeonguk.backend.service.ApplicationService;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 // api/community/[기능에따라 바뀜]
 // 게시글 조회(GET), 수정(PUT)

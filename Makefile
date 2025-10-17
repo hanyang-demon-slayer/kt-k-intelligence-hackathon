@@ -24,7 +24,7 @@ install:
 	@echo "Installing backend dependencies..."
 	cd backend && ./gradlew build --refresh-dependencies
 	@echo "Installing frontend dependencies..."
-	cd frontend_figma && npm install
+	cd frontend && npm install
 	@echo "Installing LLM dependencies..."
 	cd llm && pip install -r requirements.txt
 
@@ -58,7 +58,7 @@ test:
 	@echo "Running backend tests..."
 	cd backend && ./gradlew test
 	@echo "Running frontend tests..."
-	cd frontend_figma && npm run test
+	cd frontend && npm run test
 	@echo "Running LLM tests..."
 	cd llm && python -m pytest tests/
 
@@ -67,7 +67,7 @@ lint:
 	@echo "Linting backend..."
 	cd backend && ./gradlew checkstyleMain
 	@echo "Linting frontend..."
-	cd frontend_figma && npm run lint
+	cd frontend && npm run lint
 	@echo "Linting LLM..."
 	cd llm && flake8 . --max-line-length=100
 
@@ -76,7 +76,7 @@ format:
 	@echo "Formatting backend..."
 	cd backend && ./gradlew spotlessApply
 	@echo "Formatting frontend..."
-	cd frontend_figma && npm run format
+	cd frontend && npm run format
 	@echo "Formatting LLM..."
 	cd llm && black . && isort .
 
@@ -93,7 +93,7 @@ dev-backend:
 	cd backend && ./gradlew bootRun
 
 dev-frontend:
-	cd frontend_figma && npm run dev
+	cd frontend && npm run dev
 
 dev-llm:
 	cd llm && python main.py
@@ -110,7 +110,7 @@ security-scan:
 	@echo "Running security scan for backend..."
 	cd backend && ./gradlew dependencyCheckAnalyze
 	@echo "Running security scan for frontend..."
-	cd frontend_figma && npm audit
+	cd frontend && npm audit
 	@echo "Running security scan for LLM..."
 	cd llm && safety check
 
