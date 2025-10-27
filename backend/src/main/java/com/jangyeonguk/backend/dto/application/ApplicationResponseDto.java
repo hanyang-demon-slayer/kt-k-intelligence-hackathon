@@ -5,7 +5,6 @@ import com.jangyeonguk.backend.domain.ApplicationStatus;
 import com.jangyeonguk.backend.dto.coverletter.CoverLetterQuestionAnswerResponseDto;
 import com.jangyeonguk.backend.dto.evaluation.EvaluationResultResponseDto;
 import com.jangyeonguk.backend.dto.resume.ResumeItemAnswerResponseDto;
-import com.jangyeonguk.backend.dto.jobposting.JobPostingResponseDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -30,8 +29,8 @@ public class ApplicationResponseDto {
     // 지원자 정보
     private ApplicantDto applicant;
     
-    // 채용공고 정보
-    private JobPostingResponseDto jobPosting;
+    // 채용공고 ID
+    private Long jobPostingId;
     
     // 이력서 답변 목록
     private List<ResumeItemAnswerResponseDto> resumeItemAnswers;
@@ -69,9 +68,9 @@ public class ApplicationResponseDto {
                         .name(application.getApplicant().getName())
                         .email(application.getApplicant().getEmail())
                         .build())
-                // 채용공고 정보 매핑 (null 안전)
-                .jobPosting(application.getJobPosting() != null ?
-                        JobPostingResponseDto.from(application.getJobPosting()) : null)
+                // 채용공고 ID만 반환 (null 안전)
+                .jobPostingId(application.getJobPosting() != null ?
+                        application.getJobPosting().getId() : null)
                 // 이력서 답변 목록 매핑 (null 안전, 빈 리스트 기본값)
                 .resumeItemAnswers(application.getResumeItemAnswers() != null ?
                         application.getResumeItemAnswers().stream()

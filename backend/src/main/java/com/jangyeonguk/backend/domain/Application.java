@@ -53,9 +53,11 @@ public class Application {
     private EvaluationResult evaluationResult;
 
     @OneToMany(mappedBy = "application", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Builder.Default
     private List<ResumeItemAnswer> resumeItemAnswers = new ArrayList<>();
 
     @OneToMany(mappedBy = "application", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Builder.Default
     private List<CoverLetterQuestionAnswer> coverLetterQuestionAnswers = new ArrayList<>();
 
     // EvaluationResult 편의 메서드

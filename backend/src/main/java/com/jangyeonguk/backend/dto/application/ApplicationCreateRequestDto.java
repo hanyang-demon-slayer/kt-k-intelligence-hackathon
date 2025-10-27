@@ -5,7 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
 
@@ -24,10 +24,10 @@ public class ApplicationCreateRequestDto {
     @Email(message = "올바른 이메일 형식이 아닙니다")
     private String applicantEmail; // 지원자 이메일
     
-    @NotEmpty(message = "이력서 답변은 최소 1개 이상 필요합니다")
+    @NotNull(message = "이력서 답변은 필수입니다")
     private List<ResumeItemAnswerDto> resumeItemAnswers; // 이력서 항목 답변
     
-    @NotEmpty(message = "자기소개서 답변은 최소 1개 이상 필요합니다")
+    @NotNull(message = "자기소개서 답변은 필수입니다")
     private List<CoverLetterQuestionAnswerDto> coverLetterQuestionAnswers; // 자기소개서 질문 답변
 
     @Data

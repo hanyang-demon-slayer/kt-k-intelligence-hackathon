@@ -233,8 +233,4 @@ public class ApplicationService {
 
         log.info("지원서 평가 저장 완료 - Application ID: {}, Status: {}", applicationId, status);
     }
-
-
-
-
 }

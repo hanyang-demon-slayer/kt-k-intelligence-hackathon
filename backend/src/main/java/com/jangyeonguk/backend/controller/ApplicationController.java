@@ -20,7 +20,6 @@ import com.jangyeonguk.backend.dto.evaluation.EvaluationResultRequestDto;
 import com.jangyeonguk.backend.dto.evaluation.EvaluationResultResponseDto;
 import com.jangyeonguk.backend.domain.EvaluationResult;
 import com.jangyeonguk.backend.service.ApplicationService;
-import com.jangyeonguk.backend.service.AIScoringService;
 import com.jangyeonguk.backend.repository.EvaluationResultRepository;
 
 import lombok.RequiredArgsConstructor;

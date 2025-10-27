@@ -13,7 +13,7 @@ export function Sidebar({ activeMenu, onMenuChange }: SidebarProps) {
       <div className="h-12 flex items-center px-4 border-b border-gray-200">
         <div className="flex items-center gap-3">
           <div className="size-8 bg-white border border-gray-200 rounded-lg flex items-center justify-center">
-            <img src="/images/68ef30948d03254f653ed7463b0a1de5e0d29006.png" alt="Pick-ple Logo" className="w-5 h-5 object-contain" />
+            <img src="/images/pickple-logo.png" alt="Pick-ple Logo" className="w-5 h-5 object-contain" />
           </div>
           <span className="text-gray-900 font-medium">픽플 (Pick-ple)</span>
         </div>
@@ -24,7 +24,7 @@ export function Sidebar({ activeMenu, onMenuChange }: SidebarProps) {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-7 h-7 flex items-center justify-center">
-              <img src="/images/033a40190147e69e972521a68e2e3dcaa25d53d0.png" alt="KT Logo" className="w-7 h-7 object-contain" />
+              <img src="/images/kt-logo.png" alt="KT Logo" className="w-7 h-7 object-contain" />
             </div>
             <div>
               <h3 className="text-gray-900 font-semibold text-sm">KT</h3>

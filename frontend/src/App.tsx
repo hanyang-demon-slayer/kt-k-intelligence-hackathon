@@ -1,8 +1,7 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { Sidebar } from "./components/Sidebar";
-import { StatCard } from "./components/StatCard";
+import { StatCard, EvaluationSection } from "./components/DashboardComponents";
 import { ProgressSection } from "./components/ProgressSection";
-import { EvaluationSection } from "./components/EvaluationSection";
 import { RecruitmentCalendar } from "./components/RecruitmentCalendar";
 import { WorkspaceManagement } from "./components/WorkspaceManagement";
 import { ApplicationReview } from "./components/ApplicationReview";

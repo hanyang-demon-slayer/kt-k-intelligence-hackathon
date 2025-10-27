@@ -3,8 +3,7 @@ import { Search, FileText, ChevronLeft, ChevronRight, ArrowLeft, ChevronDown, Ch
 import { useJobPostingWithApplications, useEvaluationMutation, useApiUtils, useEvaluationResult } from '../hooks/useApi';
 import { ApplicationStatus } from '../services';
 import { Button } from "./ui/button";
-import { Input } from "./ui/input";
-import { Textarea } from "./ui/textarea";
+import { Input, Textarea } from "./ui/FormInputs";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "./ui/alert-dialog";
 // 새로운 통합 데이터 타입 정의
@@ -197,7 +196,6 @@ export function ApplicationReview({ onBack, onFinalEvaluation, currentWorkspaceI
   // 새로운 evaluationResult API 로깅
   useEffect(() => {
     if (separateEvaluationResult) {
-      console.log('새로운 API로 조회한 evaluationResult:', separateEvaluationResult);
     }
     if (separateEvaluationError) {
       console.error('evaluationResult API 오류:', separateEvaluationError);
@@ -207,7 +205,6 @@ export function ApplicationReview({ onBack, onFinalEvaluation, currentWorkspaceI
   // 평가 결과 저장 후 자동으로 다시 조회
   useEffect(() => {
     if (separateEvaluationResult && separateEvaluationResult.saved === true) {
-      console.log('평가 결과 저장 완료, 자동으로 다시 조회합니다.');
       // 저장 완료 후 1초 뒤에 다시 조회
       setTimeout(() => {
         refetchEvaluationResult();
@@ -357,7 +354,6 @@ export function ApplicationReview({ onBack, onFinalEvaluation, currentWorkspaceI
       
       // 로컬 상태 업데이트
       setApplicantStatuses(applicant.id, status);
-      console.log(`평가 상태 변경 완료: ${applicant.name} -> ${status} (백엔드 저장됨)`);
       
     } catch (error) {
       console.error('상태 변경 저장 실패:', error);
@@ -379,8 +375,6 @@ export function ApplicationReview({ onBack, onFinalEvaluation, currentWorkspaceI
     if (score === undefined) return;
 
     try {
-      // TODO: API 호출로 자기소개서 점수 저장
-      console.log(`자기소개서 점수 저장: 질문 ${questionId}, 점수: ${score}`);
       alert(`자기소개서 점수 ${score}점이 저장되었습니다.`);
     } catch (error) {
       console.error('자기소개서 점수 저장 실패:', error);
@@ -396,7 +390,6 @@ export function ApplicationReview({ onBack, onFinalEvaluation, currentWorkspaceI
     if (!applicant) return;
 
     try {
-      console.log(`평가 저장 시작: ${applicant.name}`);
       
       // 현재 상태 가져오기
       const currentStatus = getCurrentStatus(selectedApplicant, selectedApplicationData?.status || '');
@@ -416,7 +409,6 @@ export function ApplicationReview({ onBack, onFinalEvaluation, currentWorkspaceI
         }
       });
       
-      console.log(`평가 저장 완료: ${applicant.name}, 최종점수: ${finalScore}`);
       
       // 성공 피드백
       alert(`${applicant.name}의 평가가 저장되었습니다. (최종점수: ${finalScore}점)`);
@@ -788,21 +780,12 @@ export function ApplicationReview({ onBack, onFinalEvaluation, currentWorkspaceI
 
   // 지원자별 데이터 - 새로운 통합 데이터 구조 사용
   const getApplicantData = (applicantName: string) => {
-    console.log('getApplicantData called for:', applicantName);
-    console.log('coverLetterQuestionsData:', coverLetterQuestionsData);
     
     // 실제 API 데이터가 있으면 사용
     if (coverLetterQuestionsData && coverLetterQuestionsData.coverLetterQuestions.length > 0) {
-      console.log('Using API data, questions count:', coverLetterQuestionsData.coverLetterQuestions.length);
       const result: any = {};
       coverLetterQuestionsData.coverLetterQuestions.forEach((question, index) => {
         const questionNumber = index + 1;
-        console.log(`Question ${questionNumber}:`, {
-          questionContent: question.questionContent,
-          answerContent: question.answerContent,
-          charCount: question.charCount,
-          keywords: question.keywords
-        });
         // 키워드 처리 - 새로운 API에서 keywords 가져오기
         let keywords: string[] = [];
         
@@ -898,11 +881,9 @@ export function ApplicationReview({ onBack, onFinalEvaluation, currentWorkspaceI
               : question.qualitativeEvaluation) : []
         };
       });
-      console.log('Final result:', result);
       return result;
     }
     
-    console.log('No API data available, using fallback');
     return {};
   };
 
@@ -964,10 +945,6 @@ export function ApplicationReview({ onBack, onFinalEvaluation, currentWorkspaceI
 
   // 특정 문장을 하이라이트하는 함수 - 새로운 API 데이터 사용
   const renderAnswerWithHighlights = (answer: string) => {
-    console.log('renderAnswerWithHighlights called with answer:', answer);
-    console.log('separateEvaluationResult:', separateEvaluationResult);
-    console.log('currentQuestion:', currentQuestion);
-    
     // 새로운 API에서 answerEvaluations 가져오기
     let answerEvaluations: any[] = [];
     
@@ -978,14 +955,10 @@ export function ApplicationReview({ onBack, onFinalEvaluation, currentWorkspaceI
       
       if (currentQuestionData && currentQuestionData.answerEvaluations) {
         answerEvaluations = currentQuestionData.answerEvaluations;
-        console.log('Using API answerEvaluations:', answerEvaluations);
       }
     }
     
-    console.log('Final answerEvaluations:', answerEvaluations);
-    
     if (!answerEvaluations || answerEvaluations.length === 0) {
-      console.log('No answerEvaluations found, returning plain text');
       return <span>{answer}</span>;
     }
     
@@ -1001,11 +974,6 @@ export function ApplicationReview({ onBack, onFinalEvaluation, currentWorkspaceI
     answerEvaluations.forEach((evaluation: any, evalIndex: number) => {
       const evaluatedContent = evaluation.evaluatedContent;
       const evaluationCriteriaName = evaluation.evaluationCriteriaName;
-      console.log(`Evaluation ${evalIndex + 1}:`, {
-        criteriaName: evaluationCriteriaName,
-        evaluatedContent: evaluatedContent,
-        grade: evaluation.grade
-      });
       
       if (!evaluatedContent) return;
       
@@ -1031,8 +999,6 @@ export function ApplicationReview({ onBack, onFinalEvaluation, currentWorkspaceI
     
     // 시작 위치로 정렬
     allHighlights.sort((a, b) => a.start - b.start);
-    
-    console.log('All highlights found:', allHighlights);
     
     // 모든 하이라이트를 반드시 처리하는 로직
     const processedHighlights: Array<{
@@ -1114,10 +1080,6 @@ export function ApplicationReview({ onBack, onFinalEvaluation, currentWorkspaceI
     
     // 시작 위치로 정렬
     processedHighlights.sort((a, b) => a.start - b.start);
-    
-    console.log('Processed highlights:', processedHighlights);
-    console.log('Total highlights processed:', processedHighlights.length);
-    console.log('Original highlights count:', allHighlights.length);
     
     // 텍스트를 부분별로 분할
     const parts: Array<{ 
