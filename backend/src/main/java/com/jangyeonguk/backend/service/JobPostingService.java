@@ -1,7 +1,9 @@
 package com.jangyeonguk.backend.service;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -437,6 +439,126 @@ public class JobPostingService {
                 }
             });
         }
+    }
+
+    /**
+     * 공고별 평가 기준 조회 (최적화된 버전)
+     */
+    public Map<String, Object> getEvaluationCriteria(Long jobPostingId) {
+        JobPosting jobPosting = jobPostingRepository.findById(jobPostingId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 채용공고입니다: " + jobPostingId));
+
+        Map<String, Object> criteria = new HashMap<>();
+        criteria.put("jobPostingId", jobPosting.getId());
+        criteria.put("jobPostingTitle", jobPosting.getTitle());
+        criteria.put("totalScore", jobPosting.getTotalScore());
+        criteria.put("resumeScoreWeight", jobPosting.getResumeScoreWeight());
+        criteria.put("coverLetterScoreWeight", jobPosting.getCoverLetterScoreWeight());
+        criteria.put("passingScore", jobPosting.getPassingScore());
+        criteria.put("resumeCriteria", buildResumeCriteria(jobPosting.getResumeItems()));
+        criteria.put("coverLetterCriteria", buildCoverLetterCriteria(jobPosting.getCoverLetterQuestions()));
+
+        return criteria;
+    }
+
+    /**
+     * 이력서 평가 기준 빌드
+     */
+    private List<Map<String, Object>> buildResumeCriteria(List<ResumeItem> resumeItems) {
+        if (resumeItems == null) return List.of();
+        
+        return resumeItems.stream()
+                .map(this::buildResumeItemCriteria)
+                .toList();
+    }
+
+    /**
+     * 이력서 항목별 평가 기준 빌드
+     */
+    private Map<String, Object> buildResumeItemCriteria(ResumeItem resumeItem) {
+        Map<String, Object> criteria = new HashMap<>();
+        criteria.put("id", resumeItem.getId());
+        criteria.put("name", resumeItem.getName());
+        criteria.put("type", resumeItem.getType());
+        criteria.put("isRequired", resumeItem.getIsRequired());
+        criteria.put("maxScore", resumeItem.getMaxScore());
+        criteria.put("criteria", buildResumeItemCriterionDetails(resumeItem.getCriteria()));
+        return criteria;
+    }
+
+    /**
+     * 이력서 항목 평가 기준 세부사항 빌드
+     */
+    private List<Map<String, Object>> buildResumeItemCriterionDetails(List<ResumeItemCriterion> criteria) {
+        if (criteria == null) return List.of();
+        
+        return criteria.stream()
+                .map(criterion -> {
+                    Map<String, Object> criterionMap = new HashMap<>();
+                    criterionMap.put("grade", criterion.getGrade());
+                    criterionMap.put("description", criterion.getDescription());
+                    criterionMap.put("scorePerGrade", criterion.getScorePerGrade());
+                    return criterionMap;
+                })
+                .toList();
+    }
+
+    /**
+     * 자기소개서 평가 기준 빌드
+     */
+    private List<Map<String, Object>> buildCoverLetterCriteria(List<CoverLetterQuestion> questions) {
+        if (questions == null) return List.of();
+        
+        return questions.stream()
+                .map(this::buildCoverLetterQuestionCriteria)
+                .toList();
+    }
+
+    /**
+     * 자기소개서 질문별 평가 기준 빌드
+     */
+    private Map<String, Object> buildCoverLetterQuestionCriteria(CoverLetterQuestion question) {
+        Map<String, Object> criteria = new HashMap<>();
+        criteria.put("id", question.getId());
+        criteria.put("content", question.getContent());
+        criteria.put("isRequired", question.getIsRequired());
+        criteria.put("maxCharacters", question.getMaxCharacters());
+        criteria.put("criteria", buildCoverLetterQuestionCriterionDetails(question.getCriteria()));
+        return criteria;
+    }
+
+    /**
+     * 자기소개서 질문 평가 기준 세부사항 빌드
+     */
+    private List<Map<String, Object>> buildCoverLetterQuestionCriterionDetails(List<CoverLetterQuestionCriterion> criteria) {
+        if (criteria == null) return List.of();
+        
+        return criteria.stream()
+                .map(criterion -> {
+                    Map<String, Object> criterionMap = new HashMap<>();
+                    criterionMap.put("name", criterion.getName());
+                    criterionMap.put("overallDescription", criterion.getOverallDescription());
+                    criterionMap.put("details", buildCoverLetterCriterionDetailDetails(criterion.getDetails()));
+                    return criterionMap;
+                })
+                .toList();
+    }
+
+    /**
+     * 자기소개서 평가 기준 세부사항 빌드
+     */
+    private List<Map<String, Object>> buildCoverLetterCriterionDetailDetails(List<CoverLetterQuestionCriterionDetail> details) {
+        if (details == null) return List.of();
+        
+        return details.stream()
+                .map(detail -> {
+                    Map<String, Object> detailMap = new HashMap<>();
+                    detailMap.put("grade", detail.getGrade());
+                    detailMap.put("description", detail.getDescription());
+                    detailMap.put("scorePerGrade", detail.getScorePerGrade());
+                    return detailMap;
+                })
+                .toList();
     }
 
 }

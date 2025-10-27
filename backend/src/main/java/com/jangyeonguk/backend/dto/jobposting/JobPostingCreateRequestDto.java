@@ -2,7 +2,6 @@ package com.jangyeonguk.backend.dto.jobposting;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.jangyeonguk.backend.domain.EmploymentType;
-import com.jangyeonguk.backend.domain.PostingStatus;
 import com.jangyeonguk.backend.dto.coverletter.CoverLetterQuestionCreateRequestDto;
 import com.jangyeonguk.backend.dto.resume.ResumeItemCreateRequestDto;
 import lombok.AllArgsConstructor;
@@ -43,6 +42,7 @@ public class JobPostingCreateRequestDto {
     private String experienceRequirements; // 경력 요구사항
     private String educationRequirements; // 학력 요구사항
     private String requiredSkills; // 요구기술, 스킬
+    
     @Min(value = 0, message = "총점은 0 이상이어야 합니다")
     private Integer totalScore; // 총점
     

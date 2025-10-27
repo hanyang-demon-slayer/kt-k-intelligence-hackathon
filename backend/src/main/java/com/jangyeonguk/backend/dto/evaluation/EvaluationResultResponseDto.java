@@ -24,6 +24,7 @@ public class EvaluationResultResponseDto {
     private String resumeScores;
     private String coverLetterScores;
     private String overallEvaluation;
+    private String hrComment; // HR 담당자 추가 코멘트
     private String evaluationCompletedAt;
     private String createdAt;
 
@@ -40,8 +41,7 @@ public class EvaluationResultResponseDto {
                 .resumeScores(evaluationResult.getResumeScores())
                 .coverLetterScores(evaluationResult.getCoverLetterScores())
                 .overallEvaluation(evaluationResult.getOverallEvaluation())
-                .evaluationCompletedAt(evaluationResult.getEvaluationCompletedAt() != null ? 
-                    evaluationResult.getEvaluationCompletedAt().toString() : null)
+                .hrComment(evaluationResult.getHrComment())
                 .createdAt(evaluationResult.getCreatedAt() != null ? 
                     evaluationResult.getCreatedAt().toString() : null)
                 .build();

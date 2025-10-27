@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect, useCallback } from "react";
 import { Search, FileText, ChevronLeft, ChevronRight, ArrowLeft, ChevronDown, ChevronUp, Sun, Moon, User, Brain, Target, TrendingUp, AlertTriangle, CheckCircle, XCircle, Award, GraduationCap, ShieldCheck, Heart, Zap, BookOpen, Lightbulb, Eye, MessageSquare, Briefcase, Star } from "lucide-react";
-import { useJobPostingWithApplications, useEvaluationMutation, useApiUtils, useEvaluationResultByApplicationId } from '../hooks/useApi';
+import { useJobPostingWithApplications, useEvaluationMutation, useApiUtils, useEvaluationResult } from '../hooks/useApi';
 import { ApplicationStatus } from '../services';
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -178,7 +178,7 @@ export function ApplicationReview({ onBack, onFinalEvaluation, currentWorkspaceI
     isLoading: separateEvaluationLoading, 
     error: separateEvaluationError,
     refetch: refetchEvaluationResult
-  } = useEvaluationResultByApplicationId(selectedApplicationData?.id || 0);
+  } = useEvaluationResult(selectedApplicationData?.id || 0);
   const [currentQuestion, setCurrentQuestion] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
   const [showScoreDetails, setShowScoreDetails] = useState(false);
