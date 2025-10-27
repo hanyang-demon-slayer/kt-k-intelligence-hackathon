@@ -30,7 +30,7 @@ export interface ApplicationCreateRequestDto {
 }
 
 // 평가 결과 관련 타입
-export interface EvaluationResultDto {
+export interface EvaluationResultRequestDto {
   applicantId: number;
   applicantName: string;
   applicantEmail: string;

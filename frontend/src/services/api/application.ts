@@ -2,8 +2,7 @@ import { api } from '../config/axios';
 import { 
   ApplicationCreateRequestDto, 
   ApplicationResponseDto, 
-  EvaluationResultDto,
-  CoverLetterQuestionsResponse
+  EvaluationResultRequestDto
 } from '../types';
 
 // 지원서 관련 API
@@ -26,28 +25,13 @@ export const applicationApi = {
     return response.data;
   },
   
-  // 지원서 ID로 지원자 정보와 답변 조회
-  getApplicationDetails: async (applicationId: number): Promise<any> => {
-    const response = await api.get(`/applications/${applicationId}/details`);
+  // 지원서 상세 조회 (지원자 정보, 답변, 평가 결과 포함)
+  getApplicationDetails: async (applicationId: number): Promise<ApplicationResponseDto> => {
+    const response = await api.get(`/applications/${applicationId}`);
     return response.data;
   },
 
-  // 지원서의 자기소개서 문항 데이터 조회
-  getCoverLetterQuestions: async (applicationId: number): Promise<CoverLetterQuestionsResponse> => {
-    const response = await api.get(`/applications/${applicationId}/cover-letter-questions`);
-    return response.data;
-  },
   
-  // 지원서 평가 결과 조회
-  getApplicationEvaluationResult: async (applicationId: number): Promise<EvaluationResultDto | null> => {
-    try {
-      const response = await api.get(`/applications/${applicationId}/details`);
-      return response.data.evaluationResult || null;
-    } catch (error) {
-      console.error('평가 결과 조회 실패:', error);
-      return null;
-    }
-  },
   
   // 지원서 통계 조회
   getApplicationStatistics: async (): Promise<{
@@ -105,7 +89,7 @@ export const applicationApi = {
       }>;
     }>;
   }> => {
-    const response = await api.get(`/applications/job-postings/${jobPostingId}/evaluation-criteria`);
+    const response = await api.get(`/job-postings/${jobPostingId}/evaluation-criteria`);
     return response.data;
   },
   
@@ -127,9 +111,4 @@ export const applicationApi = {
     return response.data;
   },
 
-  // ApplicationId로 evaluationResult 조회 (FastAPI에서 조회하고 저장)
-  getEvaluationResultByApplicationId: async (applicationId: number): Promise<any> => {
-    const response = await api.get(`/applications/${applicationId}/evaluation-result`);
-    return response.data;
-  }
 };

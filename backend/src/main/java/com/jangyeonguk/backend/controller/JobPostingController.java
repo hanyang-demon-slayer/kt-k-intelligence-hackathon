@@ -8,7 +8,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 
 /**
  * 채용공고 Controller
@@ -66,6 +68,20 @@ public class JobPostingController {
     public ResponseEntity<JobPostingResponseDto> getJobPostingWithApplications(@PathVariable Long id) {
         JobPostingResponseDto response = jobPostingService.getJobPostingWithApplications(id);
         return ResponseEntity.ok(response);
+    }
+
+    /**
+     * 공고별 평가 기준 조회
+     */
+    @GetMapping("/{jobPostingId}/evaluation-criteria")
+    public ResponseEntity<Map<String, Object>> getEvaluationCriteria(@PathVariable Long jobPostingId) {
+        try {
+            Map<String, Object> criteria = jobPostingService.getEvaluationCriteria(jobPostingId);
+            return ResponseEntity.ok(criteria);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", "평가 기준 조회에 실패했습니다: " + e.getMessage()));
+        }
     }
 
 }

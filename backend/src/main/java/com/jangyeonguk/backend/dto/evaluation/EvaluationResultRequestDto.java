@@ -7,12 +7,12 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 /**
- * LLM 평가 결과 DTO
+ * LLM 평가 결과 요청 DTO
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class EvaluationResultDto {
+public class EvaluationResultRequestDto {
 
     // 1. 지원자 정보
     private Long applicantId;

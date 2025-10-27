@@ -53,11 +53,11 @@ public class EvaluationResult {
     @Column(name = "overall_evaluation", columnDefinition = "TEXT")
     private String overallEvaluation; // JSON 형태로 저장
 
-    @Column(name = "evaluation_completed_at")
-    private LocalDateTime evaluationCompletedAt;
+    @Column(name = "hr_comment", columnDefinition = "TEXT")
+    private String hrComment; // HR 담당자 추가 코멘트
 
     @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    private LocalDateTime createdAt; // 생성일시
 
     @PrePersist
     protected void onCreate() {

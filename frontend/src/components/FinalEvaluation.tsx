@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback } from "react";
 import { ArrowLeft, User, Mail, Hash, Award, ChevronDown, ChevronUp, FileText, CheckCircle, AlertCircle } from "lucide-react";
-import { useJobPostingWithApplications, useEvaluationMutation, useApiUtils, useEvaluationResultByApplicationId } from '../hooks/useApi';
+import { useJobPostingWithApplications, useEvaluationMutation, useApiUtils, useEvaluationResult } from '../hooks/useApi';
 import { ApplicationResponseDto, ApplicationStatus, jobPostingApi } from '../services';
 import { useQueryClient } from '@tanstack/react-query';
 import { Button } from "./ui/button";
@@ -146,7 +146,7 @@ export function FinalEvaluation({ onBack, onEvaluationCompleted, currentWorkspac
     data: selectedApplicantEvaluationResult, 
     isLoading: evaluationLoading,
     refetch: refetchEvaluationResult
-  } = useEvaluationResultByApplicationId(
+  } = useEvaluationResult(
     selectedApplicantForDetails ? parseInt(selectedApplicantForDetails.id) : 0
   );
 

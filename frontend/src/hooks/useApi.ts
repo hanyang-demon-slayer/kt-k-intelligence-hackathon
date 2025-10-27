@@ -10,7 +10,7 @@ import {
   JobPostingCreateRequestDto,
   ApplicationCreateRequestDto,
   CompanyCreateRequestDto,
-  EvaluationResultDto,
+  EvaluationResultRequestDto,
   CoverLetterQuestionsResponse,
   apiUtils
 } from '../services';
@@ -193,23 +193,7 @@ export const useApplicationSubmission = () => {
   });
 };
 
-// 지원서 평가 결과 조회
-export const useApplicationEvaluationResult = (applicationId: number | null) => {
-  return useQuery<EvaluationResultDto | null>({
-    queryKey: ['applicationEvaluationResult', applicationId],
-    queryFn: () => applicationId ? applicationApi.getApplicationEvaluationResult(applicationId) : Promise.resolve(null),
-    enabled: !!applicationId,
-  });
-};
 
-// 자기소개서 문항 데이터 조회
-export const useCoverLetterQuestions = (applicationId: number | null) => {
-  return useQuery<CoverLetterQuestionsResponse | null>({
-    queryKey: ['coverLetterQuestions', applicationId],
-    queryFn: () => applicationId ? applicationApi.getCoverLetterQuestions(applicationId) : Promise.resolve(null),
-    enabled: !!applicationId,
-  });
-};
 
 // 새로운 통합 API: 공고별 모든 데이터 조회 (지원서, 이력서, 자소서, 평가결과 포함)
 export const useJobPostingWithApplications = (jobPostingId: number) => {
@@ -220,14 +204,15 @@ export const useJobPostingWithApplications = (jobPostingId: number) => {
   });
 };
 
-// ApplicationId로 evaluationResult 조회
-export const useEvaluationResultByApplicationId = (applicationId: number) => {
+
+// 평가 결과 조회 (기존 엔드포인트 사용)
+export const useEvaluationResult = (applicationId: number | null) => {
   return useQuery({
     queryKey: ['evaluationResult', applicationId],
-    queryFn: () => applicationApi.getEvaluationResultByApplicationId(applicationId),
+    queryFn: () => applicationId ? api.get(`/applications/${applicationId}/evaluation-result`).then(res => res.data) : Promise.resolve(null),
     enabled: !!applicationId,
-    refetchOnWindowFocus: false, // 창 포커스 시 자동 재조회 비활성화
-    staleTime: 0, // 데이터를 항상 fresh하게 유지
+    refetchOnWindowFocus: false,
+    staleTime: 0,
   });
 };
 
