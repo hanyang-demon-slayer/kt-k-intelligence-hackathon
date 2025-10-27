@@ -21,11 +21,16 @@ interface FinalEvaluationProps {
   onBack: () => void;
   onEvaluationCompleted?: () => void;
   currentWorkspaceId?: string | null;
+  memos?: Record<string, string>;
   applicantStatuses?: Record<string, string>;
   onStatusChange?: (applicantId: string, status: string) => void;
+  onMemoChange?: (applicantId: string, memo: string) => void;
+  getApplicantsByWorkspace?: (workspaceId: string | null) => Applicant[];
+  isDarkMode?: boolean;
+  onToggleDarkMode?: () => void;
 }
 
-export function FinalEvaluation({ onBack, onEvaluationCompleted, currentWorkspaceId, applicantStatuses = {}, onStatusChange }: FinalEvaluationProps) {
+export function FinalEvaluation({ onBack, onEvaluationCompleted, currentWorkspaceId, memos = {}, applicantStatuses = {}, onStatusChange, onMemoChange, getApplicantsByWorkspace, isDarkMode, onToggleDarkMode }: FinalEvaluationProps) {
   const { data: jobPostingData, isLoading, error } = useJobPostingWithApplications(
     currentWorkspaceId ? (currentWorkspaceId === "2" ? 1 : parseInt(currentWorkspaceId)) : 0
   );

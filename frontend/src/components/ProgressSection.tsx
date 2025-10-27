@@ -1,19 +1,11 @@
 import React from "react";
 import { Badge } from "./ui/badge";
+import { WorkspaceCard } from "../services/types/jobPosting";
 
 interface JobPosting {
   position: string;
   status: "모집중" | "모집 예정" | "모집완료" | "평가완료";
   workspaceId?: string;
-}
-
-interface WorkspaceCard {
-  id: string;
-  title: string;
-  period: string;
-  team: string;
-  applicants?: number;
-  status: "recruiting" | "scheduled" | "recruitment-completed" | "evaluation-completed";
 }
 
 interface ProgressSectionProps {

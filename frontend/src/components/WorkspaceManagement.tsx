@@ -2,18 +2,8 @@ import React, { useState } from "react";
 import { Plus, MapPin, Users, Calendar, Copy, FileText, Clock } from "lucide-react";
 import { Button } from "./ui/button";
 import { JobPostingForm } from "./JobPostingForm";
+import { WorkspaceCard } from "../services/types/jobPosting";
 import { toast } from "sonner";
-
-interface WorkspaceCard {
-  id: string;
-  title: string;
-  period: string;
-  team: string;
-  applicants?: number;
-  status: "recruiting" | "scheduled" | "recruitment-completed" | "evaluation-completed";
-  evaluationDeadline?: string; // 평가 마감일 추가
-  publicLinkUrl?: string; // 공개 링크 URL 추가
-}
 
 interface WorkspaceCardProps {
   workspace: WorkspaceCard;

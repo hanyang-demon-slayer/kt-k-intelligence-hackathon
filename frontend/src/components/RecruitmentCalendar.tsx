@@ -1,22 +1,13 @@
 import React, { useState } from "react";
 import { ChevronLeft, ChevronRight, Clock } from "lucide-react";
 import { getKoreanDate } from "../utils/dateUtils";
+import { WorkspaceCard } from "../services/types/jobPosting";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "./ui/tooltip";
-
-interface WorkspaceCard {
-  id: string;
-  title: string;
-  period: string;
-  team: string;
-  applicants?: number;
-  status: "recruiting" | "scheduled" | "recruitment-completed" | "evaluation-completed";
-  evaluationDeadline?: string; // 평가 마감일 추가
-}
 
 interface RecruitmentPeriod {
   start: Date;

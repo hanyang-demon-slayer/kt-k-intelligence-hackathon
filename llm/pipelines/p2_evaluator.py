@@ -9,7 +9,7 @@ from transformers import AutoTokenizer, AutoModelForCausalLM
 import chromadb
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
-from llm.core.config import settings # core/config.py에서 설정값 가져오기
+from core.config import settings # core/config.py에서 설정값 가져오기
 
 # --- P2용 헬퍼 함수 ---
 def load_json_file(filepath):

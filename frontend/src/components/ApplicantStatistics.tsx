@@ -1,6 +1,4 @@
-import React, { useMemo } from "react";
-import { useApplicationsByJobPosting, useApiUtils } from '../hooks/useApi';
-import { ApplicationResponseDto } from '../services';
+import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { Progress } from "./ui/progress";
@@ -8,33 +6,13 @@ import {
   Users, 
   TrendingUp, 
   Target, 
-  Clock, 
   Award, 
   FileText, 
-  CheckCircle2, 
-  XCircle, 
   AlertCircle,
   BarChart3,
-  PieChart,
-  Calendar,
   Star
 } from "lucide-react";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart as RechartsPieChart, Cell, LineChart, Line, Area, AreaChart } from "recharts";
-
-// 지원자 데이터 타입
-interface Applicant {
-  id: string;
-  name: string;
-  email: string;
-  score: number;
-  status: 'passed' | 'failed' | 'pending' | 'not-evaluated' | 'unqualified';
-  keywords: string[];
-  questions: {
-    question: string;
-    answer: string;
-    charCount: string;
-  }[];
-}
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from "recharts";
 
 // 워크스페이스 데이터 타입
 interface WorkspaceCard {
@@ -48,129 +26,93 @@ interface WorkspaceCard {
 
 interface ApplicantStatisticsProps {
   workspaceData: WorkspaceCard[];
-  getApplicantsByWorkspace: (workspaceId: string | null) => Applicant[];
+  getApplicantsByWorkspace?: (workspaceId: string | null) => any[];
 }
 
 export function ApplicantStatistics({ workspaceData, getApplicantsByWorkspace }: ApplicantStatisticsProps) {
-  // API 유틸리티 함수
-  const apiUtils = useApiUtils();
-
-  // API에서 가져온 지원자 데이터를 프론트엔드 형식으로 변환하는 함수
-  const convertApplicationsToApplicants = (applications: ApplicationResponseDto[]): Applicant[] => {
-    return applications.map(app => ({
-      id: app.id.toString(),
-      name: app.applicantName,
-      email: app.applicantEmail,
-      score: 0, // 실제 점수는 별도 API에서 가져와야 함
-      status: apiUtils.convertApplicationStatus(app.status),
-      keywords: [], // 실제 키워드는 별도 API에서 가져와야 함
-      questions: [] // 실제 질문/답변은 별도 API에서 가져와야 함
-    }));
-  };
-  // 전체 통계 데이터 계���
-  const statisticsData = useMemo(() => {
-    const allApplicants: Applicant[] = [];
-    const workspaceStats: Array<{
-      workspaceId: string;
-      title: string;
-      status: string;
-      applicants: Applicant[];
-      totalCount: number;
-      evaluatedCount: number;
-      passedCount: number;
-      averageScore: number;
-    }> = [];
-
-    // 모든 워크스페이스의 지원자 데이터 수집
-    workspaceData.forEach(workspace => {
-      const applicants = getApplicantsByWorkspace(workspace.id);
-      allApplicants.push(...applicants);
-      
-      const evaluatedApplicants = applicants.filter(a => a.status === 'passed' || a.status === 'unqualified');
-      const passedApplicants = applicants.filter(a => a.status === 'passed');
-      const averageScore = applicants.length > 0 ? 
-        Math.round(applicants.reduce((sum, a) => sum + a.score, 0) / applicants.length) : 0;
-
-      workspaceStats.push({
-        workspaceId: workspace.id,
-        title: workspace.title,
-        status: workspace.status,
-        applicants,
-        totalCount: applicants.length,
-        evaluatedCount: evaluatedApplicants.length,
-        passedCount: passedApplicants.length,
-        averageScore
-      });
-    });
-
-    const totalApplicants = allApplicants.length;
-    const totalEvaluated = allApplicants.filter(a => a.status === 'passed' || a.status === 'unqualified').length;
-    const totalPassed = allApplicants.filter(a => a.status === 'passed').length;
-    const totalPending = allApplicants.filter(a => a.status === 'not-evaluated').length;
-    const overallAverageScore = totalApplicants > 0 ? 
-      Math.round(allApplicants.reduce((sum, a) => sum + a.score, 0) / totalApplicants) : 0;
-    const evaluationCompletionRate = totalApplicants > 0 ? 
-      Math.round((totalEvaluated / totalApplicants) * 100) : 0;
-    const passRate = totalEvaluated > 0 ? 
-      Math.round((totalPassed / totalEvaluated) * 100) : 0;
-
-    // 점수 분포 계산
-    const scoreDistribution = [
-      { range: '40-50점', count: allApplicants.filter(a => a.score >= 40).length, color: '#22c55e' },
-      { range: '30-39점', count: allApplicants.filter(a => a.score >= 30 && a.score < 40).length, color: '#eab308' },
-      { range: '20-29점', count: allApplicants.filter(a => a.score >= 20 && a.score < 30).length, color: '#f97316' },
-      { range: '0-19점', count: allApplicants.filter(a => a.score < 20).length, color: '#ef4444' }
-    ];
-
-    // 직무별 통계
-    const positionStats = workspaceStats.reduce((acc, workspace) => {
-      const position = workspace.title.includes('BE') ? 'Backend' :
-                     workspace.title.includes('FE') ? 'Frontend' :
-                     workspace.title.includes('UI/UX') ? 'Designer' :
-                     workspace.title.includes('기획') ? 'PM' : 'Other';
-      
-      if (!acc[position]) {
-        acc[position] = { totalApplicants: 0, averageScore: 0, passRate: 0 };
+  // 임시 모의 데이터
+  const statisticsData = {
+    totalApplicants: 47,
+    totalEvaluated: 32,
+    totalPassed: 18,
+    totalPending: 15,
+    overallAverageScore: 35,
+    evaluationCompletionRate: 68,
+    passRate: 56,
+    scoreDistribution: [
+      { range: '40-50점', count: 12, color: '#22c55e' },
+      { range: '30-39점', count: 18, color: '#eab308' },
+      { range: '20-29점', count: 12, color: '#f97316' },
+      { range: '0-19점', count: 5, color: '#ef4444' }
+    ],
+    weeklyTrend: [
+      { date: '09/16', applications: 8, evaluations: 4 },
+      { date: '09/17', applications: 12, evaluations: 6 },
+      { date: '09/18', applications: 6, evaluations: 8 },
+      { date: '09/19', applications: 9, evaluations: 5 },
+      { date: '09/20', applications: 3, evaluations: 7 },
+      { date: '09/21', applications: 5, evaluations: 2 },
+      { date: '09/22', applications: 4, evaluations: 0 }
+    ],
+    positionStats: {
+      Backend: { totalApplicants: 18, averageScore: 38, passRate: 65 },
+      Frontend: { totalApplicants: 15, averageScore: 34, passRate: 48 },
+      Designer: { totalApplicants: 9, averageScore: 32, passRate: 45 },
+      PM: { totalApplicants: 5, averageScore: 35, passRate: 55 }
+    },
+    workspaceStats: [
+      {
+        workspaceId: '1',
+        title: '백엔드 개발자 공고 (BE)',
+        status: 'recruiting',
+        totalCount: 18,
+        evaluatedCount: 12,
+        passedCount: 8,
+        averageScore: 38
+      },
+      {
+        workspaceId: '2',
+        title: '프론트엔드 개발자 공고 (FE)',
+        status: 'recruiting',
+        totalCount: 15,
+        evaluatedCount: 10,
+        passedCount: 5,
+        averageScore: 34
+      },
+      {
+        workspaceId: '3',
+        title: 'UI/UX 디자이너 공고',
+        status: 'recruiting',
+        totalCount: 9,
+        evaluatedCount: 7,
+        passedCount: 3,
+        averageScore: 32
+      },
+      {
+        workspaceId: '4',
+        title: '기획자/PM 공고',
+        status: 'recruiting',
+        totalCount: 5,
+        evaluatedCount: 3,
+        passedCount: 2,
+        averageScore: 35
       }
-      
-      acc[position].totalApplicants += workspace.totalCount;
-      acc[position].averageScore = workspace.averageScore; // 단순화
-      acc[position].passRate = workspace.evaluatedCount > 0 ? 
-        Math.round((workspace.passedCount / workspace.evaluatedCount) * 100) : 0;
-      
-      return acc;
-    }, {} as Record<string, { totalApplicants: number; averageScore: number; passRate: number }>);
-
-    // 주간 지원 트렌드 (모의 데이터)
-    const weeklyTrend = [
-      { date: '09/16', applications: 2, evaluations: 1 },
-      { date: '09/17', applications: 3, evaluations: 2 },
-      { date: '09/18', applications: 1, evaluations: 3 },
-      { date: '09/19', applications: 2, evaluations: 1 },
-      { date: '09/20', applications: 0, evaluations: 2 },
-      { date: '09/21', applications: 1, evaluations: 1 },
-      { date: '09/22', applications: 1, evaluations: 0 }
-    ];
-
-    return {
-      totalApplicants,
-      totalEvaluated,
-      totalPassed,
-      totalPending,
-      overallAverageScore,
-      evaluationCompletionRate,
-      passRate,
-      workspaceStats,
-      scoreDistribution,
-      positionStats,
-      weeklyTrend
-    };
-  }, [workspaceData, getApplicantsByWorkspace]);
-
-  const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+    ]
+  };
 
   return (
     <div className="p-8 space-y-6">
+      {/* 임시 페이지 안내 */}
+      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+        <div className="flex items-center gap-2">
+          <AlertCircle className="h-5 w-5 text-yellow-600" />
+          <h3 className="font-medium text-yellow-800">임시 페이지입니다</h3>
+        </div>
+        <p className="text-sm text-yellow-700 mt-1">
+          현재 모의 데이터로 구성된 임시 통계 페이지입니다. 실제 백엔드 연동은 추후 구현 예정입니다.
+        </p>
+      </div>
+
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">지원자 통계</h1>
@@ -194,8 +136,6 @@ export function ApplicantStatistics({ workspaceData, getApplicantsByWorkspace }:
             </p>
           </CardContent>
         </Card>
-
-
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -319,13 +259,7 @@ export function ApplicantStatistics({ workspaceData, getApplicantsByWorkspace }:
               <div key={workspace.workspaceId} className="p-4 border rounded-lg">
                 <div className="flex items-center justify-between mb-3">
                   <h4 className="font-medium">{workspace.title}</h4>
-                  <Badge variant={
-                    workspace.status === 'recruiting' ? 'default' :
-                    workspace.status === 'scheduled' ? 'secondary' : 'outline'
-                  }>
-                    {workspace.status === 'recruiting' ? '모집중' :
-                     workspace.status === 'scheduled' ? '예정' : '완료'}
-                  </Badge>
+                  <Badge variant="default">모집중</Badge>
                 </div>
                 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
@@ -347,18 +281,16 @@ export function ApplicantStatistics({ workspaceData, getApplicantsByWorkspace }:
                   </div>
                 </div>
 
-                {workspace.totalCount > 0 && (
-                  <div className="mt-3">
-                    <div className="flex justify-between text-xs text-gray-500 mb-1">
-                      <span>평가 진행률</span>
-                      <span>{Math.round((workspace.evaluatedCount / workspace.totalCount) * 100)}%</span>
-                    </div>
-                    <Progress 
-                      value={(workspace.evaluatedCount / workspace.totalCount) * 100} 
-                      className="h-2"
-                    />
+                <div className="mt-3">
+                  <div className="flex justify-between text-xs text-gray-500 mb-1">
+                    <span>평가 진행률</span>
+                    <span>{Math.round((workspace.evaluatedCount / workspace.totalCount) * 100)}%</span>
                   </div>
-                )}
+                  <Progress 
+                    value={(workspace.evaluatedCount / workspace.totalCount) * 100} 
+                    className="h-2"
+                  />
+                </div>
               </div>
             ))}
           </div>
@@ -375,35 +307,13 @@ export function ApplicantStatistics({ workspaceData, getApplicantsByWorkspace }:
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {statisticsData.evaluationCompletionRate < 70 && (
-              <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                <h4 className="font-medium text-yellow-800 mb-2">⚠️ 평가 진행 속도 개선 필요</h4>
-                <p className="text-sm text-yellow-700">
-                  현재 평가 완료율이 {statisticsData.evaluationCompletionRate}%입니다. 
-                  적시 채용을 위해 평가 속도를 높이는 것을 권장합니다.
-                </p>
-              </div>
-            )}
-            
-            {statisticsData.passRate < 30 && (
-              <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-                <h4 className="font-medium text-red-800 mb-2">📉 합격률 점검 필요</h4>
-                <p className="text-sm text-red-700">
-                  현재 합격률이 {statisticsData.passRate}%로 낮습니다. 
-                  채용 기준을 재검토하거나 더 많은 지원자 풀 확보를 고려해보세요.
-                </p>
-              </div>
-            )}
-            
-            {statisticsData.overallAverageScore >= 35 && (
-              <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-                <h4 className="font-medium text-green-800 mb-2">✅ 우수한 지원자 품질</h4>
-                <p className="text-sm text-green-700">
-                  평균 점수가 {statisticsData.overallAverageScore}점으로 높습니다. 
-                  채용 마케팅이 효과적으로 작동하고 있습니다.
-                </p>
-              </div>
-            )}
+            <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+              <h4 className="font-medium text-green-800 mb-2">✅ 우수한 지원자 품질</h4>
+              <p className="text-sm text-green-700">
+                평균 점수가 {statisticsData.overallAverageScore}점으로 높습니다. 
+                채용 마케팅이 효과적으로 작동하고 있습니다.
+              </p>
+            </div>
             
             <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
               <h4 className="font-medium text-blue-800 mb-2">💡 데이터 기반 개선 제안</h4>

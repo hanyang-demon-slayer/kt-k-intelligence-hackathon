@@ -30,10 +30,10 @@ const colorConfig = {
     iconText: "text-purple-600"
   },
   orange: {
-    bg: "bg-gray-50",
-    text: "text-gray-600",
-    iconBg: "bg-gray-100", 
-    iconText: "text-gray-600"
+    bg: "bg-orange-50",
+    text: "text-orange-600",
+    iconBg: "bg-orange-100", 
+    iconText: "text-orange-600"
   },
   yellow: {
     bg: "bg-yellow-50",
@@ -65,7 +65,7 @@ export function StatCard({ title, value, icon: Icon, color, onClick }: StatCardP
 }
 
 // EvaluationSection 컴포넌트
-interface EvaluationItem {
+interface EvaluationItemData {
   position: string;
   completionRate?: number;
   evaluatedCount: number;
@@ -73,11 +73,15 @@ interface EvaluationItem {
 }
 
 interface EvaluationSectionProps {
-  evaluationData?: EvaluationItem[];
+  evaluationData?: EvaluationItemData[];
   onItemClick?: (position: string) => void;
 }
 
-function EvaluationItem({ position, completionRate = 0, evaluatedCount, totalApplicants, onClick }: EvaluationItem & { onClick?: () => void }) {
+interface EvaluationItemProps extends EvaluationItemData {
+  onClick?: () => void;
+}
+
+function EvaluationItem({ position, completionRate = 0, evaluatedCount, totalApplicants, onClick }: EvaluationItemProps) {
   return (
     <div 
       className={`flex items-center justify-between p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-300 transition-all duration-200 ${onClick ? 'cursor-pointer hover:shadow-md hover:scale-105' : ''}`}
@@ -129,7 +133,7 @@ export function EvaluationSection({ evaluationData = [], onItemClick }: Evaluati
       <div className="p-6 space-y-4">
         {evaluationData.map((item, index) => (
           <EvaluationItem 
-            key={index} 
+            key={`${item.position}-${index}`} 
             {...item} 
             onClick={onItemClick ? () => onItemClick(item.position) : undefined}
           />

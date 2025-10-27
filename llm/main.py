@@ -10,14 +10,14 @@ from fastapi import FastAPI, Depends, HTTPException, BackgroundTasks
 from pydantic import BaseModel
 
 # 각 모듈에서 필요한 클래스, 함수, 객체들을 가져옵니다.
-from llm.schemas import (
+from schemas import (
     EvaluationCriteriaRequest, EvaluationCriteriaResponse,
     ApplicationSubmitRequest, ApplicationSubmitResponse, EvaluationResult
 )
-from llm.dependencies import get_p2_llm_manager, get_similarity_evaluator
-from llm.pipelines.p1_builder import run_p1_pipeline
-from llm.pipelines.p2_evaluator import run_p2_pipeline, LLMManager, SimilarityEvaluator
-from llm.core.config import settings
+from dependencies import get_p2_llm_manager, get_similarity_evaluator
+from pipelines.p1_builder import run_p1_pipeline
+from pipelines.p2_evaluator import run_p2_pipeline, LLMManager, SimilarityEvaluator
+from core.config import settings
 
 # --- 로깅 및 FastAPI 앱 설정 ---
 logging.basicConfig(level=logging.INFO)

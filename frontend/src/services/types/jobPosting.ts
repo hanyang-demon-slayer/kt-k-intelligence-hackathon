@@ -17,19 +17,12 @@ export enum PostingStatus {
   EVALUATION_COMPLETE = 'EVALUATION_COMPLETE'
 }
 
-// 이력서 항목 타입
+// 이력서 항목 타입 (백엔드와 일치)
 export enum ResumeItemType {
   TEXT = 'TEXT',
   NUMBER = 'NUMBER',
   DATE = 'DATE',
-  FILE = 'FILE',
-  SELECT = 'SELECT',
-  CATEGORY = 'CATEGORY',
-  NUMERIC_RANGE = 'NUMERIC_RANGE',
-  RULE_BASED_COUNT = 'RULE_BASED_COUNT',
-  SCORE_RANGE = 'SCORE_RANGE',
-  DURATION_BASED = 'DURATION_BASED',
-  HOURS_RANGE = 'HOURS_RANGE'
+  FILE = 'FILE'
 }
 
 // 등급 열거형
@@ -38,6 +31,18 @@ export enum Grade {
   GOOD = 'GOOD',
   NORMAL = 'NORMAL',
   POOR = 'POOR'
+}
+
+// 채용공고 카드 인터페이스 (공통)
+export interface WorkspaceCard {
+  id: string;
+  title: string;
+  period: string;
+  team: string;
+  applicants?: number;
+  status: "recruiting" | "scheduled" | "recruitment-completed" | "evaluation-completed";
+  evaluationDeadline?: string;
+  publicLinkUrl?: string;
 }
 
 // 이력서 항목 평가 기준

@@ -6,18 +6,8 @@ import { Progress } from "./ui/progress";
 import { Badge } from "./ui/badge";
 import { useJobPostings, useApplicationsByJobPosting } from "../hooks/useApi";
 import { useQueries } from "@tanstack/react-query";
-import { JobPostingResponseDto, ApplicationResponseDto } from "../services";
+import { JobPostingResponseDto, ApplicationResponseDto, WorkspaceCard } from "../services";
 import { EvaluationCriteriaModal } from "./EvaluationCriteriaModal";
-
-interface WorkspaceCard {
-  id: string;
-  title: string;
-  period: string;
-  team: string;
-  applicants?: number;
-  status: "recruiting" | "scheduled" | "recruitment-completed" | "evaluation-completed";
-  evaluationDeadline?: string;
-}
 
 interface ApplicationEvaluationProps {
   onViewApplication?: (workspaceId: string) => void;

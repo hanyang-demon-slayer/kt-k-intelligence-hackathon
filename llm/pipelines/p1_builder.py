@@ -9,7 +9,7 @@ from tqdm import tqdm
 from transformers import AutoTokenizer, AutoModelForCausalLM
 import chromadb
 # core/config.py에서 설정값을 가져오기 위한 import
-from llm.core.config import settings
+from core.config import settings
 
 # --- P1용 헬퍼 함수 ---
 def load_json_file(filepath):

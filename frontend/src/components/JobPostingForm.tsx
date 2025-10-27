@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { ArrowLeft, Plus, Trash2, Calendar, MapPin, Users, Building, Target, Clock, Settings, GraduationCap, ShieldCheck, Heart, AlignLeft, Award, Upload, FileText, Download } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, Calendar, MapPin, Users, Building, Target, Clock, GraduationCap, ShieldCheck, Heart, AlignLeft, Award, Upload, FileText, Download } from "lucide-react";
 import { Button } from "./ui/button";
 import { Input, Textarea } from "./ui/FormInputs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Label } from "./ui/label";
 import { Switch } from "./ui/switch";
-import { useJobPostingMutation, useJobPosting } from '../hooks/useApi';
+import { useJobPostingMutation } from '../hooks/useApi';
 import { 
   JobPostingCreateRequestDto,
   EmploymentType,
@@ -25,7 +25,7 @@ import { toast } from "sonner";
 interface ResumeField {
   id: string;
   name: string;
-  type: 'text' | 'select' | 'number' | 'date' | 'file' | 'CATEGORY' | 'NUMERIC_RANGE' | 'RULE_BASED_COUNT' | 'SCORE_RANGE' | 'DURATION_BASED' | 'HOURS_RANGE';
+  type: 'TEXT' | 'NUMBER' | 'DATE' | 'FILE';
   required: boolean;
   options?: { value: string; label: string }[];
 }
@@ -49,234 +49,31 @@ interface EvaluationCriteriaItem {
   };
 }
 
-interface WorkspaceCard {
-  id: string;
-  title: string;
-  period: string;
-  team: string;
-  applicants?: number;
-  status: "recruiting" | "scheduled" | "recruitment-completed" | "evaluation-completed";
-  evaluationDeadline?: string; // 평가 마감일 추가
-}
-
 interface JobPostingFormProps {
   onBack: () => void;
-  editingWorkspace?: WorkspaceCard | null;
-  isEditMode?: boolean;
 }
 
-export function JobPostingForm({ onBack, editingWorkspace, isEditMode = false }: JobPostingFormProps) {
+export function JobPostingForm({ onBack }: JobPostingFormProps) {
   const [activeTab, setActiveTab] = useState("basic");
   
   // API 연동
-  const { createMutation, updateMutation } = useJobPostingMutation();
-  
-  // 수정 모드일 때 실제 API 데이터 가져오기
-  const { data: jobPostingData, isLoading: isLoadingJobPosting } = useJobPosting(
-    isEditMode && editingWorkspace ? parseInt(editingWorkspace.id) : 0
-  );
-  
-  // API 데이터를 파싱하는 함수
-  const parseApiData = (data: any) => {
-    return {
-      title: data.title || "",
-      description: data.description || "",
-      team: data.teamDepartment || "",
-      position: data.jobRole || "frontend",
-      employmentType: data.employmentType || "FULL_TIME",
-      startDate: data.applicationStartDate || "",
-      endDate: data.applicationEndDate || "",
-      evaluationDeadline: data.evaluationEndDate || "",
-      location: "",
-      experience: data.experienceRequirements || "",
-      education: data.educationRequirements || "",
-      skills: data.requiredSkills || ""
-    };
-  };
-
-  // 수정 모드에서 기존 데이터를 파싱하는 함수 (fallback)
-  const parseWorkspaceData = (workspace: WorkspaceCard) => {
-    // period를 파싱하여 날짜 추출 (25.09.01 - 25.09.15 형태)
-    const [startDateStr, endDateStr] = workspace.period.split(' - ');
-    const parseDate = (dateStr: string) => {
-      const [year, month, day] = dateStr.split('.');
-      return `20${year}-${month}-${day}`;
-    };
-
-    // team에서 팀명과 직무 분리 (AI 1팀, BE 개발자 형태)
-    const [teamName, positionName] = workspace.team.split(', ');
-    
-    // 직무명을 영어 키로 변환
-    const getPositionKey = (positionName: string) => {
-      const positionMap: { [key: string]: string } = {
-        '프론트엔드 개발자': 'frontend',
-        '백엔드 개발자': 'backend',
-        '풀스택 개발자': 'fullstack',
-        '모바일 개발자': 'mobile',
-        'UI/UX 디자이너': 'designer',
-        '기획자/PM': 'pm',
-        '데이터 분석가': 'data'
-      };
-      return positionMap[positionName] || 'frontend';
-    };
-
-    // 고용 형태 추정 (제목에서 추출)
-    const getEmploymentType = (title: string) => {
-      if (title.includes('인턴')) return 'INTERNSHIP';
-      if (title.includes('파트타임') || title.includes('파트타임')) return 'PART_TIME';
-      if (title.includes('계약직') || title.includes('계약')) return 'CONTRACT';
-      if (title.includes('프리랜서') || title.includes('프리')) return 'FREELANCE';
-      if (title.includes('신입') || title.includes('경력')) return 'FULL_TIME';
-      return 'FULL_TIME'; // 기본값
-    };
-
-    return {
-      title: workspace.title,
-      description: "",
-      team: teamName,
-      position: getPositionKey(positionName),
-      employmentType: getEmploymentType(workspace.title),
-      startDate: parseDate(startDateStr),
-      endDate: parseDate(endDateStr),
-      evaluationDeadline: (workspace as any).evaluationDeadline || "", // 평가 마감일 추가
-      location: "",
-      experience: "",
-      education: "",
-      skills: ""
-    };
-  };
+  const { createMutation } = useJobPostingMutation();
 
   // 기본 정보
-  const [basicInfo, setBasicInfo] = useState(() => {
-    if (isEditMode && editingWorkspace) {
-      return parseWorkspaceData(editingWorkspace);
-    }
-    return {
-      title: "",
-      description: "",
-      team: "",
-      position: "",
-      employmentType: "", // 기본값 설정 - 사용자가 선택하도록
-      startDate: "",
-      endDate: "",
-      evaluationDeadline: "", // 서류 평가 마감일 필드 추가
-      location: "",
-      experience: "",
-      education: "",
-      skills: ""
-    };
+  const [basicInfo, setBasicInfo] = useState({
+    title: "",
+    description: "",
+    team: "",
+    position: "",
+    employmentType: "", // 기본값 설정 - 사용자가 선택하도록
+    startDate: "",
+    endDate: "",
+    evaluationDeadline: "", // 서류 평가 마감일 필드 추가
+    location: "",
+    experience: "",
+    education: "",
+    skills: ""
   });
-
-  // API 데이터가 로드되면 폼 데이터 업데이트
-  useEffect(() => {
-    if (isEditMode && jobPostingData) {
-      const parsedData = parseApiData(jobPostingData);
-      setBasicInfo(parsedData);
-      
-      // 이력서 항목 데이터 설정
-      if (jobPostingData.resumeItems) {
-        setResumeFields(jobPostingData.resumeItems.map((item: any) => ({
-          id: item.id.toString(),
-          name: item.name,
-          type: item.type.toLowerCase() as any,
-          required: item.isRequired,
-          maxScore: item.maxScore
-        })));
-
-        // 이력서 평가 기준 데이터 설정
-        const resumeCriteriaData: EvaluationCriteriaItem[] = [];
-        jobPostingData.resumeItems.forEach((item: any) => {
-          if (item.criteria && item.criteria.length > 0) {
-            const criteria = item.criteria;
-            const evaluationCriteria: EvaluationCriteriaItem = {
-              id: item.id.toString(),
-              name: item.name,
-              maxScore: item.maxScore || 0,
-              criteria: {
-                excellent: { 
-                  score: criteria.find((c: any) => c.grade === 'EXCELLENT')?.scorePerGrade || 0,
-                  description: criteria.find((c: any) => c.grade === 'EXCELLENT')?.description || ""
-                },
-                good: { 
-                  score: criteria.find((c: any) => c.grade === 'GOOD')?.scorePerGrade || 0,
-                  description: criteria.find((c: any) => c.grade === 'GOOD')?.description || ""
-                },
-                normal: { 
-                  score: criteria.find((c: any) => c.grade === 'NORMAL')?.scorePerGrade || 0,
-                  description: criteria.find((c: any) => c.grade === 'NORMAL')?.description || ""
-                },
-                poor: { 
-                  score: criteria.find((c: any) => c.grade === 'POOR')?.scorePerGrade || 0,
-                  description: criteria.find((c: any) => c.grade === 'POOR')?.description || ""
-                },
-              }
-            };
-            resumeCriteriaData.push(evaluationCriteria);
-          }
-        });
-        setResumeEvaluationCriteria(resumeCriteriaData);
-      }
-      
-      // 자기소개서 질문 데이터 설정
-      if (jobPostingData.coverLetterQuestions) {
-        setCoverLetterQuestions(jobPostingData.coverLetterQuestions.map((question: any) => ({
-          id: question.id.toString(),
-          question: question.content,
-          maxLength: question.maxCharacters,
-          required: question.isRequired
-        })));
-
-        // 자기소개서 평가 기준 데이터 설정
-        const essayCriteriaData: EvaluationCriteriaItem[] = [];
-        jobPostingData.coverLetterQuestions.forEach((question: any) => {
-          if (question.criteria && question.criteria.length > 0) {
-            question.criteria.forEach((criterion: any) => {
-              if (criterion.details && criterion.details.length > 0) {
-                const evaluationCriteria: EvaluationCriteriaItem = {
-                  id: question.id.toString(),
-                  name: criterion.name || "평가 기준",
-                  maxScore: Math.max(...criterion.details.map((d: any) => d.scorePerGrade || 0)),
-                  criteria: {
-                    excellent: { 
-                      score: criterion.details.find((d: any) => d.grade === 'EXCELLENT')?.scorePerGrade || 0,
-                      description: criterion.details.find((d: any) => d.grade === 'EXCELLENT')?.description || ""
-                    },
-                    good: { 
-                      score: criterion.details.find((d: any) => d.grade === 'GOOD')?.scorePerGrade || 0,
-                      description: criterion.details.find((d: any) => d.grade === 'GOOD')?.description || ""
-                    },
-                    normal: { 
-                      score: criterion.details.find((d: any) => d.grade === 'NORMAL')?.scorePerGrade || 0,
-                      description: criterion.details.find((d: any) => d.grade === 'NORMAL')?.description || ""
-                    },
-                    poor: { 
-                      score: criterion.details.find((d: any) => d.grade === 'POOR')?.scorePerGrade || 0,
-                      description: criterion.details.find((d: any) => d.grade === 'POOR')?.description || ""
-                    },
-                  }
-                };
-                essayCriteriaData.push(evaluationCriteria);
-              }
-            });
-          }
-        });
-        setEssayEvaluationCriteria(essayCriteriaData);
-      }
-      
-      // 평가 기준 데이터 설정
-      setEvaluationCriteria({
-        totalScore: jobPostingData.totalScore || 100,
-        resumeScoreWeight: 60, // 기본값 사용
-        coverLetterScoreWeight: 40, // 기본값 사용
-        passingScore: jobPostingData.passingScore || 60,
-        autoEvaluation: jobPostingData.aiAutomaticEvaluation || true,
-        manualReview: jobPostingData.manualReview || true
-      });
-      
-      // 채용공고 상태 설정
-      setPostingStatus(jobPostingData.postingStatus || "SCHEDULED");
-    }
-  }, [isEditMode, jobPostingData]);
 
   // 학력 필드에 대한 기본 평가 기준 설정
   useEffect(() => {
@@ -467,55 +264,55 @@ export function JobPostingForm({ onBack, editingWorkspace, isEditMode = false }:
     {
       id: "name",
       name: "이름",
-      type: "text",
+      type: "TEXT",
       required: true
     },
     {
       id: "email",
       name: "이메일",
-      type: "text",
+      type: "TEXT",
       required: true
     },
     {
       id: "education",
       name: "학력",
-      type: "CATEGORY",
+      type: "TEXT",
       required: true
     },
     {
       id: "grade",
       name: "학점",
-      type: "NUMERIC_RANGE",
+      type: "NUMBER",
       required: true
     },
     {
       id: "certificate",
       name: "자격증",
-      type: "RULE_BASED_COUNT",
+      type: "TEXT",
       required: true
     },
     {
       id: "language",
       name: "어학",
-      type: "SCORE_RANGE",
+      type: "TEXT",
       required: true
     },
     {
       id: "award",
       name: "수상경력",
-      type: "CATEGORY",
+      type: "TEXT",
       required: true
     },
     {
       id: "experience",
       name: "경력",
-      type: "DURATION_BASED",
+      type: "NUMBER",
       required: true
     },
     {
       id: "volunteer",
       name: "봉사시간",
-      type: "HOURS_RANGE",
+      type: "NUMBER",
       required: false
     }
   ]);
@@ -545,9 +342,6 @@ export function JobPostingForm({ onBack, editingWorkspace, isEditMode = false }:
     autoEvaluation: true,
     manualReview: true
   });
-
-  // 채용공고 상태 (수정 모드에서만 사용)
-  const [postingStatus, setPostingStatus] = useState("SCHEDULED");
 
   // 파일 업로드 상태
   const [uploadedFiles, setUploadedFiles] = useState<{
@@ -595,7 +389,7 @@ export function JobPostingForm({ onBack, editingWorkspace, isEditMode = false }:
 
       return {
         name: field.name,
-        type: field.type.toUpperCase() as ResumeItemType,
+        type: field.type as ResumeItemType,
         isRequired: field.required,
         maxScore: fieldCriteria?.maxScore || 0,
         criteria
@@ -681,7 +475,7 @@ export function JobPostingForm({ onBack, editingWorkspace, isEditMode = false }:
     const newField: ResumeField = {
       id: Date.now().toString(),
       name: "",
-      type: "text",
+      type: "TEXT",
       required: false
     };
     setResumeFields([...resumeFields, newField]);
@@ -861,109 +655,6 @@ export function JobPostingForm({ onBack, editingWorkspace, isEditMode = false }:
     setEssayEvaluationCriteria(essayEvaluationCriteria.filter(item => item.id !== id));
   };
 
-  // 프론트엔드 데이터를 백엔드 DTO로 변환하는 함수
-  const convertToJobPostingCreateRequest = (): JobPostingCreateRequestDto => {
-    // 이력서 항목 변환 (평가 기준 포함)
-    const resumeItems: ResumeItemCreateRequestDto[] = resumeFields.map(field => {
-      const fieldCriteria = resumeEvaluationCriteria.find(criteria => criteria.id === field.id);
-      
-      const criteria: ResumeItemCriterionCreateRequestDto[] = fieldCriteria ? [
-        {
-          grade: Grade.EXCELLENT,
-          description: fieldCriteria.criteria.excellent.description,
-          scorePerGrade: fieldCriteria.criteria.excellent.score
-        },
-        {
-          grade: Grade.GOOD,
-          description: fieldCriteria.criteria.good.description,
-          scorePerGrade: fieldCriteria.criteria.good.score
-        },
-        {
-          grade: Grade.NORMAL,
-          description: fieldCriteria.criteria.normal.description,
-          scorePerGrade: fieldCriteria.criteria.normal.score
-        },
-        {
-          grade: Grade.POOR,
-          description: fieldCriteria.criteria.poor.description,
-          scorePerGrade: fieldCriteria.criteria.poor.score
-        }
-      ] : [];
-
-      return {
-        name: field.name,
-        type: field.type.toUpperCase() as ResumeItemType,
-        isRequired: field.required,
-        maxScore: fieldCriteria?.maxScore || 0,
-        criteria
-      };
-    });
-
-    // 자기소개서 질문 변환 (평가 기준 포함)
-    const coverLetterQuestionsData: CoverLetterQuestionCreateRequestDto[] = coverLetterQuestions.map(question => {
-      const questionCriteria = essayEvaluationCriteria.find(criteria => criteria.id === question.id);
-      
-      const criteria: CoverLetterQuestionCriterionCreateRequestDto[] = questionCriteria ? [
-        {
-          name: questionCriteria.name,
-          overallDescription: `${questionCriteria.name} 평가 기준`,
-          details: [
-            {
-              grade: Grade.EXCELLENT,
-              description: questionCriteria.criteria.excellent.description,
-              scorePerGrade: questionCriteria.criteria.excellent.score
-            },
-            {
-              grade: Grade.NORMAL,
-              description: questionCriteria.criteria.good.description,
-              scorePerGrade: questionCriteria.criteria.good.score
-            },
-            {
-              grade: Grade.NORMAL,
-              description: questionCriteria.criteria.normal.description,
-              scorePerGrade: questionCriteria.criteria.normal.score
-            },
-            {
-              grade: Grade.POOR,
-              description: questionCriteria.criteria.poor.description,
-              scorePerGrade: questionCriteria.criteria.poor.score
-            }
-          ]
-        }
-      ] : [];
-
-      return {
-        content: question.question,
-        isRequired: question.required,
-        maxCharacters: question.maxLength,
-        criteria
-      };
-    });
-
-    return {
-      title: basicInfo.title,
-      teamDepartment: basicInfo.team,
-      jobRole: basicInfo.position,
-      employmentType: basicInfo.employmentType as EmploymentType,
-      applicationStartDate: basicInfo.startDate ? new Date(basicInfo.startDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
-      applicationEndDate: basicInfo.endDate ? new Date(basicInfo.endDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
-      evaluationEndDate: basicInfo.evaluationDeadline ? new Date(basicInfo.evaluationDeadline).toISOString().split('T')[0] : (basicInfo.endDate ? new Date(basicInfo.endDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]),
-      description: basicInfo.description,
-      experienceRequirements: basicInfo.experience,
-      educationRequirements: basicInfo.education,
-      requiredSkills: basicInfo.skills,
-      totalScore: evaluationCriteria.totalScore,
-      resumeScoreWeight: evaluationCriteria.resumeScoreWeight,
-      coverLetterScoreWeight: evaluationCriteria.coverLetterScoreWeight,
-      passingScore: evaluationCriteria.passingScore,
-      aiAutomaticEvaluation: evaluationCriteria.autoEvaluation,
-      manualReview: evaluationCriteria.manualReview,
-      postingStatus: postingStatus as PostingStatus,
-      resumeItems,
-      coverLetterQuestions: coverLetterQuestionsData
-    };
-  };
-
   const handleSave = async () => {
     
     // 기본 검증
@@ -973,20 +664,11 @@ export function JobPostingForm({ onBack, editingWorkspace, isEditMode = false }:
     }
 
     try {
-      const jobPostingData = convertToJobPostingCreateRequest();
+      const jobPostingData = convertToBackendFormat();
 
-      if (isEditMode && editingWorkspace) {
-        // 수정
-        await updateMutation.mutateAsync({
-          id: parseInt(editingWorkspace.id),
-          data: jobPostingData
-        });
-        toast.success('채용공고가 성공적으로 수정되었습니다!');
-      } else {
-        // 생성
-        await createMutation.mutateAsync(jobPostingData);
-        toast.success('새 채용공고가 성공적으로 등록되었습니다!');
-      }
+      // 생성
+      await createMutation.mutateAsync(jobPostingData);
+      toast.success('새 채용공고가 성공적으로 등록되었습니다!');
       
       // 성공 시 이전 화면으로 이동
       onBack();
@@ -1002,32 +684,6 @@ export function JobPostingForm({ onBack, editingWorkspace, isEditMode = false }:
                   basicInfo.startDate && basicInfo.endDate && resumeFields.length > 0 && 
                   coverLetterQuestions.length > 0;
 
-  // 로딩 상태 처리
-  if (isEditMode && isLoadingJobPosting) {
-    return (
-      <div className="min-h-screen bg-white flex flex-col">
-        <div className="h-16 border-b border-gray-200 flex items-center justify-between px-6 bg-white">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm" onClick={onBack}>
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              뒤로가기
-            </Button>
-            <div>
-              <h1 className="text-xl font-semibold text-gray-900">채용공고 수정</h1>
-              <p className="text-sm text-gray-500">기존 채용공고 정보를 수정합니다</p>
-            </div>
-          </div>
-        </div>
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">채용공고 정보를 불러오는 중...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-white flex flex-col">
       {/* Header */}
@@ -1040,7 +696,7 @@ export function JobPostingForm({ onBack, editingWorkspace, isEditMode = false }:
           <div className="h-4 w-px bg-gray-300" />
           <div>
             <h1 className="text-2xl font-semibold text-gray-900">
-              {isEditMode ? '공고 수정' : '새 공고 등록'}
+              새 공고 등록
             </h1>
           </div>
         </div>
@@ -1051,15 +707,15 @@ export function JobPostingForm({ onBack, editingWorkspace, isEditMode = false }:
           <Button 
             onClick={handleSave} 
             className="bg-blue-600 hover:bg-blue-700"
-            disabled={!canSave || createMutation.isPending || updateMutation.isPending}
+            disabled={!canSave || createMutation.isPending}
           >
-            {createMutation.isPending || updateMutation.isPending ? (
+            {createMutation.isPending ? (
               <>
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                {isEditMode ? '수정 중...' : '저장 중...'}
+                저장 중...
               </>
             ) : (
-              isEditMode ? '수정 완료' : '공고 저장'
+              '공고 저장'
             )}
           </Button>
         </div>
@@ -1182,45 +838,6 @@ export function JobPostingForm({ onBack, editingWorkspace, isEditMode = false }:
                     </p>
                   </div>
 
-                  {/* 채용공고 상태 변경 (수정 모드에서만 표시) */}
-                  {isEditMode && (
-                    <div className="border-t pt-6">
-                      <div className="flex items-center gap-2 mb-4">
-                        <Settings className="w-5 h-5 text-orange-600" />
-                        <h3 className="text-lg font-semibold text-gray-900">채용공고 상태 관리</h3>
-                      </div>
-                      <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
-                        <div className="flex items-center gap-4">
-                          <div className="flex-1">
-                            <Label htmlFor="postingStatus" className="text-sm font-medium text-orange-800">
-                              현재 상태
-                            </Label>
-                            <Select value={postingStatus} onValueChange={setPostingStatus}>
-                              <SelectTrigger className="mt-1">
-                                <SelectValue placeholder="상태를 선택하세요" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="SCHEDULED">모집 예정</SelectItem>
-                                <SelectItem value="IN_PROGRESS">모집중</SelectItem>
-                                <SelectItem value="CLOSED">모집 마감</SelectItem>
-                                <SelectItem value="EVALUATION_COMPLETE">평가 완료</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div className="text-sm text-orange-700">
-                            <p className="font-medium">상태 변경 안내</p>
-                            <p className="text-xs mt-1">
-                              • 모집 예정: 아직 모집이 시작되지 않음<br/>
-                              • 모집중: 현재 지원을 받고 있음<br/>
-                              • 모집 마감: 지원 마감, 평가 진행 중<br/>
-                              • 평가 완료: 모든 평가가 완료됨
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
                   <div>
                     <Label htmlFor="description">공고 설명</Label>
                     <Textarea
@@ -1322,11 +939,10 @@ export function JobPostingForm({ onBack, editingWorkspace, isEditMode = false }:
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="text">텍스트</SelectItem>
-                              <SelectItem value="number">숫자</SelectItem>
-                              <SelectItem value="date">날짜</SelectItem>
-                              <SelectItem value="file">파일</SelectItem>
-                              <SelectItem value="select">선택</SelectItem>
+                              <SelectItem value="TEXT">텍스트</SelectItem>
+                              <SelectItem value="NUMBER">숫자</SelectItem>
+                              <SelectItem value="DATE">날짜</SelectItem>
+                              <SelectItem value="FILE">파일</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
