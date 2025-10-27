@@ -33,66 +33,6 @@ export const applicationApi = {
 
   
   
-  // 지원서 통계 조회
-  getApplicationStatistics: async (): Promise<{
-    totalApplications: number;
-    totalCompletedEvaluations: number;
-    totalPendingEvaluations: number;
-    totalCompletionRate: number;
-    jobPostingStatistics: Array<{
-      jobPostingId: number;
-      jobPostingTitle: string;
-      totalApplications: number;
-      completedEvaluations: number;
-      pendingEvaluations: number;
-      completionRate: number;
-      postingStatus: string;
-    }>;
-  }> => {
-    const response = await api.get('/applications/statistics');
-    return response.data;
-  },
-  
-  // 공고별 평가 기준 조회
-  getEvaluationCriteria: async (jobPostingId: number): Promise<{
-    jobPostingId: number;
-    jobPostingTitle: string;
-    totalScore: number;
-    resumeScoreWeight: number;
-    coverLetterScoreWeight: number;
-    passingScore: number;
-    resumeCriteria: Array<{
-      id: number;
-      name: string;
-      type: string;
-      isRequired: boolean;
-      maxScore: number;
-      criteria: Array<{
-        grade: string;
-        description: string;
-        scorePerGrade: number;
-      }>;
-    }>;
-    coverLetterCriteria: Array<{
-      id: number;
-      content: string;
-      isRequired: boolean;
-      maxCharacters: number;
-      criteria: Array<{
-        name: string;
-        overallDescription: string;
-        details: Array<{
-          grade: string;
-          description: string;
-          scorePerGrade: number;
-        }>;
-      }>;
-    }>;
-  }> => {
-    const response = await api.get(`/job-postings/${jobPostingId}/evaluation-criteria`);
-    return response.data;
-  },
-  
   // 지원서 평가 의견 및 상태 저장
   saveEvaluation: async (applicationId: number, evaluationData: { comment: string; status: string; finalScore?: number }): Promise<string> => {
     const response = await api.put(`/applications/${applicationId}/evaluation`, evaluationData);

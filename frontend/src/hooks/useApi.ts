@@ -10,10 +10,9 @@ import {
   JobPostingCreateRequestDto,
   ApplicationCreateRequestDto,
   CompanyCreateRequestDto,
-  EvaluationResultRequestDto,
-  CoverLetterQuestionsResponse,
   apiUtils
 } from '../services';
+import { api } from '../services/config/axios';
 import { toast } from 'sonner';
 
 // 회사 정보 조회
@@ -55,7 +54,6 @@ export const useJobPosting = (id: number) => {
   });
 };
 
-
 // 채용공고 생성/수정 뮤테이션
 export const useJobPostingMutation = () => {
   const queryClient = useQueryClient();
@@ -79,14 +77,6 @@ export const useJobPostingMutation = () => {
   return { createMutation, updateMutation };
 };
 
-// 지원서 목록 조회
-export const useApplications = () => {
-  return useQuery<ApplicationResponseDto[]>({
-    queryKey: ['applications'],
-    queryFn: applicationApi.getApplications,
-  });
-};
-
 // 공고별 지원서 조회
 export const useApplicationsByJobPosting = (jobPostingId: number) => {
   return useQuery<ApplicationResponseDto[]>({
@@ -96,34 +86,8 @@ export const useApplicationsByJobPosting = (jobPostingId: number) => {
   });
 };
 
-// 지원서 통계 조회
-export const useApplicationStatistics = () => {
-  return useQuery({
-    queryKey: ['applicationStatistics'],
-    queryFn: applicationApi.getApplicationStatistics,
-  });
-};
-
-// 공고별 평가 기준 조회
-export const useEvaluationCriteria = (jobPostingId: number) => {
-  return useQuery({
-    queryKey: ['evaluationCriteria', jobPostingId],
-    queryFn: () => applicationApi.getEvaluationCriteria(jobPostingId),
-    enabled: !!jobPostingId,
-  });
-};
-
-// 지원서 상세 정보 조회
-export const useApplicationDetails = (applicationId: number) => {
-  return useQuery({
-    queryKey: ['applicationDetails', applicationId],
-    queryFn: () => applicationApi.getApplicationDetails(applicationId),
-    enabled: !!applicationId,
-  });
-};
-
-// 지원서 제출 뮤테이션
-export const useSubmitApplication = () => {
+// 지원서 제출 뮤테이션 (통합된 버전)
+export const useApplicationSubmission = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
@@ -135,6 +99,10 @@ export const useSubmitApplication = () => {
       queryClient.invalidateQueries({ queryKey: ['applications'] });
       queryClient.invalidateQueries({ queryKey: ['applications', jobPostingId] });
     },
+    onError: (error: any) => {
+      console.error('지원서 제출 실패:', error);
+      toast.error('지원서 제출에 실패했습니다. 다시 시도해주세요.');
+    }
   });
 };
 
@@ -154,18 +122,6 @@ export const useEvaluationMutation = () => {
   });
 };
 
-// 평가 결과 처리 뮤테이션
-export const useProcessEvaluationResult = () => {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: (evaluationResult: any) => applicationApi.processEvaluationResult(evaluationResult),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['applications'] });
-    },
-  });
-};
-
 // 여러 워크스페이스의 지원서 데이터를 가져오는 훅
 export const useMultipleApplications = (workspaceIds: number[]) => {
   const queries = workspaceIds.map(workspaceId => ({
@@ -179,22 +135,6 @@ export const useMultipleApplications = (workspaceIds: number[]) => {
   });
 };
 
-// Application 제출 훅
-export const useApplicationSubmission = () => {
-  return useMutation({
-    mutationFn: ({ jobPostingId, applicationData }: { 
-      jobPostingId: number; 
-      applicationData: ApplicationCreateRequestDto 
-    }) => applicationApi.submitApplication(jobPostingId, applicationData),
-    onError: (error: any) => {
-      console.error('지원서 제출 실패:', error);
-      toast.error('지원서 제출에 실패했습니다. 다시 시도해주세요.');
-    }
-  });
-};
-
-
-
 // 새로운 통합 API: 공고별 모든 데이터 조회 (지원서, 이력서, 자소서, 평가결과 포함)
 export const useJobPostingWithApplications = (jobPostingId: number) => {
   return useQuery({
@@ -203,7 +143,6 @@ export const useJobPostingWithApplications = (jobPostingId: number) => {
     enabled: !!jobPostingId,
   });
 };
-
 
 // 평가 결과 조회 (기존 엔드포인트 사용)
 export const useEvaluationResult = (applicationId: number | null) => {

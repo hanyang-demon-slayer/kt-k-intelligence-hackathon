@@ -4,7 +4,7 @@ import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Progress } from "./ui/progress";
 import { Badge } from "./ui/badge";
-import { useJobPostings, useApplicationsByJobPosting, useApplicationStatistics } from "../hooks/useApi";
+import { useJobPostings, useApplicationsByJobPosting } from "../hooks/useApi";
 import { useQueries } from "@tanstack/react-query";
 import { JobPostingResponseDto, ApplicationResponseDto } from "../services";
 import { EvaluationCriteriaModal } from "./EvaluationCriteriaModal";
@@ -26,9 +26,6 @@ interface ApplicationEvaluationProps {
 export function ApplicationEvaluation({ onViewApplication }: ApplicationEvaluationProps) {
   // 백엔드에서 채용공고 목록 조회
   const { data: jobPostings = [], isLoading: isLoadingJobPostings } = useJobPostings();
-  
-  // 백엔드에서 지원서 통계 조회
-  const { data: applicationStats, isLoading: isLoadingStats } = useApplicationStatistics();
 
   // 평가 기준 모달 상태
   const [isCriteriaModalOpen, setIsCriteriaModalOpen] = useState(false);
@@ -39,11 +36,13 @@ export function ApplicationEvaluation({ onViewApplication }: ApplicationEvaluati
     // 평가 완료된 공고는 제외하고 계산
     const activeJobPostings = jobPostings.filter(jp => jp.postingStatus !== 'EVALUATION_COMPLETE');
     
-    // 백엔드에서 가져온 실제 지원서 통계 사용
-    const totalApplicants = applicationStats?.totalApplications || 0;
-    const completedEvaluations = applicationStats?.totalCompletedEvaluations || 0;
-    const pendingEvaluations = applicationStats?.totalPendingEvaluations || 0;
-    const completionRate = applicationStats?.totalCompletionRate || 0;
+    // 채용공고 데이터로부터 통계 계산
+    const totalApplicants = jobPostings.reduce((sum, jp) => sum + (jp.applicationCount || 0), 0);
+    const completedEvaluations = jobPostings.reduce((sum, jp) => {
+      return sum + (jp.postingStatus === 'EVALUATION_COMPLETE' ? (jp.applicationCount || 0) : 0);
+    }, 0);
+    const pendingEvaluations = totalApplicants - completedEvaluations;
+    const completionRate = totalApplicants > 0 ? Math.round((completedEvaluations / totalApplicants) * 100) : 0;
     
     // 모집중 + 모집마감 공고 수 합산
     const recruitingCount = jobPostings.filter(jp => jp.postingStatus === 'IN_PROGRESS').length;
@@ -59,9 +58,18 @@ export function ApplicationEvaluation({ onViewApplication }: ApplicationEvaluati
       recruitingCount,
       closedCount,
       totalActivePostings,
-      jobPostingStatistics: applicationStats?.jobPostingStatistics || []
+      jobPostingStatistics: jobPostings.map(jp => ({
+        jobPostingId: jp.id,
+        jobPostingTitle: jp.title,
+        totalApplications: jp.applicationCount || 0,
+        completedEvaluations: jp.postingStatus === 'EVALUATION_COMPLETE' ? (jp.applicationCount || 0) : 0,
+        pendingEvaluations: jp.postingStatus !== 'EVALUATION_COMPLETE' ? (jp.applicationCount || 0) : 0,
+        completionRate: jp.applicationCount && jp.applicationCount > 0 ? 
+          (jp.postingStatus === 'EVALUATION_COMPLETE' ? 100 : 0) : 0,
+        postingStatus: jp.postingStatus
+      }))
     };
-  }, [jobPostings, applicationStats]);
+  }, [jobPostings]);
 
   const handleEvaluateApplication = (workspaceId: string) => {
     if (onViewApplication) {
@@ -80,7 +88,7 @@ export function ApplicationEvaluation({ onViewApplication }: ApplicationEvaluati
   };
 
   // 로딩 상태 처리
-  if (isLoadingJobPostings || isLoadingStats) {
+  if (isLoadingJobPostings) {
   return (
       <div className="space-y-6">
             <div>

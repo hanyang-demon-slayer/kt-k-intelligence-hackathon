@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { ArrowLeft, Plus, Trash2, Calendar, MapPin, Users, Building, Target, Clock, Settings, GraduationCap, ShieldCheck, Heart, AlignLeft, Award, Upload, FileText, Download } from "lucide-react";
 import { Button } from "./ui/button";
-import { Input } from "./ui/input";
-import { Textarea } from "./ui/textarea";
+import { Input, Textarea } from "./ui/FormInputs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
@@ -966,38 +965,26 @@ export function JobPostingForm({ onBack, editingWorkspace, isEditMode = false }:
   };
 
   const handleSave = async () => {
-    console.log('저장 버튼 클릭됨');
-    console.log('현재 상태:', postingStatus);
     
     // 기본 검증
     if (!canSave) {
-      console.log('저장 불가능: 필수 정보 누락');
       toast.error('필수 정보를 모두 입력해주세요.');
       return;
     }
 
-    console.log('저장 가능 상태 확인됨');
-
     try {
-      console.log('데이터 변환 시작');
       const jobPostingData = convertToJobPostingCreateRequest();
-      console.log('변환된 데이터:', jobPostingData);
-      console.log('포함된 상태:', jobPostingData.postingStatus);
 
       if (isEditMode && editingWorkspace) {
-        console.log('수정 모드로 API 호출 시작');
         // 수정
         await updateMutation.mutateAsync({
           id: parseInt(editingWorkspace.id),
           data: jobPostingData
         });
-        console.log('수정 API 호출 성공');
         toast.success('채용공고가 성공적으로 수정되었습니다!');
       } else {
-        console.log('생성 모드로 API 호출 시작');
         // 생성
         await createMutation.mutateAsync(jobPostingData);
-        console.log('생성 API 호출 성공');
         toast.success('새 채용공고가 성공적으로 등록되었습니다!');
       }
       

@@ -61,10 +61,10 @@ export function ApplicantStatistics({ workspaceData, getApplicantsByWorkspace }:
       id: app.id.toString(),
       name: app.applicantName,
       email: app.applicantEmail,
-      score: 0, // TODO: 실제 점수는 별도 API에서 가져와야 함
+      score: 0, // 실제 점수는 별도 API에서 가져와야 함
       status: apiUtils.convertApplicationStatus(app.status),
-      keywords: [], // TODO: 실제 키워드는 별도 API에서 가져와야 함
-      questions: [] // TODO: 실제 질문/답변은 별도 API에서 가져와야 함
+      keywords: [], // 실제 키워드는 별도 API에서 가져와야 함
+      questions: [] // 실제 질문/답변은 별도 API에서 가져와야 함
     }));
   };
   // 전체 통계 데이터 계���
